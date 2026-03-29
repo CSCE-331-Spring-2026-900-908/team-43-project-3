@@ -16,26 +16,6 @@ npm run build
 npm start
 ```
 
-## Deploy To Vercel
-
-```bash
-vercel
-```
-
-Set these project environment variables in Vercel before deploying:
-
-- `DB_HOST`
-- `DB_PORT`
-- `DB_NAME`
-- `DB_USER`
-- `DB_PASSWORD`
-- `WEATHER_LAT`
-- `WEATHER_LON`
-- `TRANSLATE_API_URL`
-- `OPENAI_API_KEY`
-
-Vercel builds the frontend from `client/` and serves the backend through `api/index.js`.
-
 ## Structure
 
 ```
