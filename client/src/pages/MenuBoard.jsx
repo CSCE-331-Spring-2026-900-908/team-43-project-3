@@ -55,3 +55,16 @@ export default function MenuBoard() {
     </div>
   );
 }
+
+const s = {
+  page: { minHeight: "100vh", background: "#1a0e0a", color: "#f5ebe0", padding: "1.5rem" },
+  header: { display: "flex", alignItems: "center", gap: "1.5rem", marginBottom: "2rem", padding: "0 1rem" },
+  logo: { fontSize: "2.2rem", fontWeight: 700, color: "#d4a574" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.5rem" },
+  catCard: { background: "rgba(255,255,255,0.05)", borderRadius: 16, padding: "1.25rem 1.5rem" },
+  catTitle: { fontSize: "1.2rem", fontWeight: 700, paddingBottom: "0.5rem", marginBottom: "0.75rem", borderBottom: "3px solid var(--primary)" },
+  menuRow: { display: "flex", alignItems: "baseline", padding: "0.4rem 0", gap: "0.5rem" },
+  itemName: { fontWeight: 500, fontSize: "1.05rem", whiteSpace: "nowrap" },
+  dots: { flex: 1, borderBottom: "1px dotted rgba(255,255,255,0.2)", marginBottom: 4 },
+  price: { fontWeight: 700, fontSize: "1.1rem", color: "#d4a574", whiteSpace: "nowrap" },
+};
