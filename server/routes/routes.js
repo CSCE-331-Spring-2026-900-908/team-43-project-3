@@ -103,3 +103,21 @@ router.post("/reset-z-report", async (_req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Sales summary
+router.get("/sales-summary", async (req, res) => {
+  const { start, end } = req.query;
+  try {
+    const { rows } = await pool.query(
+      `SELECT COUNT(*) AS order_count,
+              COALESCE(SUM(total_amount), 0) AS revenue,
+              COALESCE(AVG(total_amount), 0) AS avg_order
+       FROM orders
+       WHERE order_timestamp::date BETWEEN $1::date AND $2::date`,
+      [start, end]
+    );
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
