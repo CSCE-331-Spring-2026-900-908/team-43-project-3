@@ -245,3 +245,80 @@ function ReportsTab() {
     </div>
   );
 }
+
+function ReportView({ report }) {
+  const { type, data } = report;
+
+  if (type === "x-report" || type === "z-report") {
+    if (data.closed) return <p style={{ padding: "1rem", color: "var(--text-light)" }}>Day closed — all totals are zero.</p>;
+    return (
+      <>
+        <table>
+          <thead><tr><th>Hour</th><th>Orders</th><th>Items</th><th>Sales</th></tr></thead>
+          <tbody>
+            {data.hours.map((h) => (
+              <tr key={h.hour}>
+                <td>{String(h.hour).padStart(2, "0")}:00</td>
+                <td>{h.order_count}</td>
+                <td>{h.item_count}</td>
+                <td>${parseFloat(h.total_sales).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ padding: "0.75rem", fontWeight: 700, borderTop: "2px solid var(--border)" }}>
+          Total: {data.totals.orders} orders, {data.totals.items} items, ${data.totals.sales.toFixed(2)}
+        </div>
+      </>
+    );
+  }
+
+  if (type === "sales-summary") {
+    return (
+      <table>
+        <tbody>
+          <tr><td style={{ fontWeight: 600 }}>Total Orders</td><td>{data.order_count}</td></tr>
+          <tr><td style={{ fontWeight: 600 }}>Total Revenue</td><td>${parseFloat(data.revenue).toFixed(2)}</td></tr>
+          <tr><td style={{ fontWeight: 600 }}>Avg Order</td><td>${parseFloat(data.avg_order).toFixed(2)}</td></tr>
+        </tbody>
+      </table>
+    );
+  }
+
+  if (type === "sales-by-item") {
+    return (
+      <table>
+        <thead><tr><th>Item</th><th>Category</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+        <tbody>
+          {data.map((r) => (
+            <tr key={r.menu_item_id}><td>{r.name}</td><td>{r.category}</td><td>{r.total_qty}</td><td>${parseFloat(r.total_revenue).toFixed(2)}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
+  if (type === "product-usage") {
+    return (
+      <table>
+        <thead><tr><th>Ingredient</th><th>Unit</th><th>Usage</th></tr></thead>
+        <tbody>
+          {data.map((r, i) => (
+            <tr key={i}><td>{r.ingredient}</td><td>{r.unit}</td><td>{parseFloat(r.estimated_usage).toFixed(1)}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
+  return <pre>{JSON.stringify(data, null, 2)}</pre>;
+}
+
+const s = {
+  page: { minHeight: "100vh", display: "flex", flexDirection: "column" },
+  header: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.6rem 1.5rem", background: "var(--card)", borderBottom: "1px solid var(--border)" },
+  tabBtn: { padding: "0.4rem 1rem", borderRadius: 8, background: "transparent", border: "none", fontWeight: 500, color: "var(--text-light)" },
+  tabActive: { background: "var(--primary)", color: "#fff" },
+  main: { flex: 1, padding: "1.5rem", maxWidth: 1200, width: "100%", margin: "0 auto" },
+  field: { display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-light)" },
+};
