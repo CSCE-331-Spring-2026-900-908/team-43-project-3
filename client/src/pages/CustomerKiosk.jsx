@@ -213,3 +213,30 @@ export default function CustomerKiosk() {
     </div>
   );
 }
+
+const s = {
+  page: { height: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)", overflow: "hidden" },
+  centered: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" },
+  header: { display: "flex", alignItems: "center", gap: "1rem", padding: "0.75rem 1.5rem", background: "var(--accent)", color: "#fff" },
+  backBtn: { background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", padding: "0.4rem 0.8rem", borderRadius: 8, fontWeight: 600, fontSize: "0.9rem" },
+  logo: { fontSize: "1.5rem", fontWeight: 700 },
+  headerSub: { fontSize: "0.9rem", opacity: 0.85 },
+  body: { flex: 1, display: "flex", overflow: "hidden" },
+  sidebar: { width: 140, background: "var(--card)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", padding: "0.5rem", gap: "0.25rem", overflowY: "auto" },
+  catBtn: { display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", padding: "0.75rem 0.5rem", borderRadius: 10, background: "transparent", border: "none", fontSize: "0.8rem", fontWeight: 500, color: "var(--text)" },
+  catBtnActive: { background: "var(--primary)", color: "#fff" },
+  menuGrid: { flex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "1rem", padding: "1rem", overflowY: "auto", alignContent: "start" },
+  menuCard: { background: "var(--card)", borderRadius: "var(--radius)", boxShadow: "var(--shadow)", padding: "1.25rem 1rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem", border: "2px solid transparent", textAlign: "center" },
+  menuCardIcon: { fontSize: "2.5rem" },
+  menuCardName: { fontWeight: 600, fontSize: "0.95rem" },
+  menuCardPrice: { color: "var(--primary-dark)", fontWeight: 700 },
+  cartPanel: { width: 300, background: "var(--card)", borderLeft: "1px solid var(--border)", display: "flex", flexDirection: "column", padding: "1rem" },
+  cartItem: { display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0", borderBottom: "1px solid var(--border)" },
+  removeBtn: { background: "none", border: "none", color: "var(--danger)", fontWeight: 700, fontSize: "1rem" },
+  cartFooter: { borderTop: "2px solid var(--border)", paddingTop: "0.75rem", marginTop: "auto" },
+  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 500 },
+  modal: { background: "var(--card)", borderRadius: "var(--radius)", padding: "2rem", width: "90%", maxWidth: 460, maxHeight: "90vh", overflowY: "auto" },
+  choiceBtn: { padding: "0.5rem 1rem", borderRadius: 20, border: "2px solid var(--border)", background: "var(--bg)", fontWeight: 500, fontSize: "0.9rem" },
+  choiceBtnSel: { borderColor: "var(--primary)", background: "var(--primary)", color: "#fff" },
+  qtyBtn: { width: 40, height: 40, borderRadius: "50%", border: "2px solid var(--border)", background: "var(--bg)", fontWeight: 700, fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center" },
+};
