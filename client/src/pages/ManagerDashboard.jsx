@@ -132,3 +132,60 @@ function InventoryTab() {
     </div>
   );
 }
+
+function EmployeeTab() {
+  const [employees, setEmployees] = useState([]);
+  const [form, setForm] = useState({ name: "", role: "Cashier" });
+  const [adding, setAdding] = useState(false);
+  const load = () => api.getEmployees().then(setEmployees);
+  useEffect(() => { load(); }, []);
+
+  const addEmployee = async () => {
+    await api.createEmployee(form);
+    setAdding(false);
+    setForm({ name: "", role: "Cashier" });
+    load();
+  };
+
+  const toggleActive = async (emp) => {
+    await api.updateEmployee(emp.employee_id, { is_active: !emp.is_active });
+    load();
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <h2 style={{ fontSize: "1.1rem" }}>Employees</h2>
+        <button className="btn-primary" onClick={() => setAdding(true)}>+ Add Employee</button>
+      </div>
+      {adding && (
+        <div className="card" style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem", alignItems: "end" }}>
+          <label style={s.field}>Name <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label>
+          <label style={s.field}>Role
+            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+              <option>Cashier</option><option>Manager</option>
+            </select>
+          </label>
+          <button className="btn-primary" onClick={addEmployee}>Save</button>
+          <button className="btn-outline" onClick={() => setAdding(false)}>Cancel</button>
+        </div>
+      )}
+      <div className="card" style={{ overflowX: "auto" }}>
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Active</th><th>Actions</th></tr></thead>
+          <tbody>
+            {employees.map((e) => (
+              <tr key={e.employee_id} style={{ opacity: e.is_active ? 1 : 0.5 }}>
+                <td>{e.employee_id}</td>
+                <td>{e.name}</td>
+                <td>{e.role}</td>
+                <td>{e.is_active ? "Yes" : "No"}</td>
+                <td><button className="btn-outline" style={{ padding: "0.25rem 0.6rem", fontSize: "0.8rem" }} onClick={() => toggleActive(e)}>{e.is_active ? "Deactivate" : "Activate"}</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
