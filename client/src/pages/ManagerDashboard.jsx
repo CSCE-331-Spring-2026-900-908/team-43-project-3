@@ -97,3 +97,38 @@ function MenuTab() {
     </div>
   );
 }
+
+function InventoryTab() {
+  const [items, setItems] = useState([]);
+  const load = () => api.getInventory().then(setItems);
+  useEffect(() => { load(); }, []);
+
+  const updateQty = async (item) => {
+    const qty = prompt(`New quantity for ${item.name}:`, item.stock_quantity);
+    if (qty === null) return;
+    await api.updateInventory(item.inventory_item_id, { stock_quantity: parseFloat(qty) });
+    load();
+  };
+
+  return (
+    <div>
+      <h2 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>Inventory ({items.length} items)</h2>
+      <div className="card" style={{ overflowX: "auto" }}>
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Unit</th><th>Stock Qty</th><th>Actions</th></tr></thead>
+          <tbody>
+            {items.map((i) => (
+              <tr key={i.inventory_item_id}>
+                <td>{i.inventory_item_id}</td>
+                <td>{i.name}</td>
+                <td>{i.unit}</td>
+                <td>{parseFloat(i.stock_quantity).toFixed(1)}</td>
+                <td><button className="btn-outline" style={{ padding: "0.25rem 0.6rem", fontSize: "0.8rem" }} onClick={() => updateQty(i)}>Update Qty</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
