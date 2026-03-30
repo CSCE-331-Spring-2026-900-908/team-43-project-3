@@ -71,3 +71,63 @@ router.post("/", async (req, res) => {
     client.release();
   }
 });
+
+router.put("/:id", async (req, res) => {
+  const { name, category, base_price } = req.body;
+  try {
+    const { rows } = await pool.query(
+      "UPDATE menu_items SET name=$1, category=$2, base_price=$3 WHERE menu_item_id=$4 RETURNING *",
+      [name, category, base_price, req.params.id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: "Not found" });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM menu_item_ingredients WHERE menu_item_id = $1", [req.params.id]);
+    const { rowCount } = await client.query("DELETE FROM menu_items WHERE menu_item_id = $1", [req.params.id]);
+    await client.query("COMMIT");
+    if (rowCount === 0) return res.status(404).json({ error: "Not found" });
+    res.json({ deleted: true });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+router.get("/:id/modifiers", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT m.modifier_id, m.name AS modifier_name,
+              mc.choice_id, mc.label, mc.price_delta
+       FROM modifiers m
+       JOIN modifier_choices mc ON mc.modifier_id = m.modifier_id
+       ORDER BY m.modifier_id, mc.choice_id`
+    );
+
+    const grouped = {};
+    for (const r of rows) {
+      if (!grouped[r.modifier_id]) {
+        grouped[r.modifier_id] = { modifier_id: r.modifier_id, name: r.modifier_name, choices: [] };
+      }
+      grouped[r.modifier_id].choices.push({
+        choice_id: r.choice_id,
+        label: r.label,
+        price_delta: parseFloat(r.price_delta),
+      });
+    }
+    res.json(Object.values(grouped));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+export default router;
