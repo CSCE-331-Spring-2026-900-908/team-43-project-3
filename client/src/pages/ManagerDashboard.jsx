@@ -189,3 +189,59 @@ function EmployeeTab() {
     </div>
   );
 }
+
+function ReportsTab() {
+  const [start, setStart] = useState(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); });
+  const [end, setEnd] = useState(() => new Date().toISOString().slice(0, 10));
+  const [report, setReport] = useState(null);
+  const [reportType, setReportType] = useState("x-report");
+
+  const run = async () => {
+    try {
+      let data;
+      switch (reportType) {
+        case "x-report": data = await api.getXReport(); break;
+        case "z-report": data = await api.generateZReport(); break;
+        case "sales-summary": data = await api.getSalesSummary(start, end); break;
+        case "sales-by-item": data = await api.getSalesByItem(start, end); break;
+        case "product-usage": data = await api.getProductUsage(start, end); break;
+        default: return;
+      }
+      setReport({ type: reportType, data });
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const resetZ = async () => {
+    if (!confirm("Reset Z-Report for today? (testing only)")) return;
+    await api.resetZReport();
+    alert("Z-Report reset");
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: "0.75rem", alignItems: "end", flexWrap: "wrap", marginBottom: "1rem" }}>
+        <label style={s.field}>Report
+          <select value={reportType} onChange={(e) => setReportType(e.target.value)}>
+            <option value="x-report">X-Report</option>
+            <option value="z-report">Z-Report</option>
+            <option value="sales-summary">Sales Summary</option>
+            <option value="sales-by-item">Sales by Item</option>
+            <option value="product-usage">Product Usage</option>
+          </select>
+        </label>
+        <label style={s.field}>From <input type="date" value={start} onChange={(e) => setStart(e.target.value)} /></label>
+        <label style={s.field}>To <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></label>
+        <button className="btn-primary" onClick={run}>Generate</button>
+        <button style={{ background: "none", border: "none", color: "var(--text-light)", fontSize: "0.8rem", textDecoration: "underline" }} onClick={resetZ}>Reset Z-Report</button>
+      </div>
+
+      {report && (
+        <div className="card" style={{ overflowX: "auto" }}>
+          <ReportView report={report} />
+        </div>
+      )}
+    </div>
+  );
+}
