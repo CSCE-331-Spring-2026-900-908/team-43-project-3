@@ -1,9 +1,22 @@
+/**
+ * Manager dashboard shell.
+ *
+ * The dashboard switches between menu, inventory, employee, and report
+ * tools that are all backed by the shared API layer.
+ *
+ * @returns {JSX.Element}
+ */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 const TABS = ["Menu", "Inventory", "Employees", "Reports"];
 
+/**
+ * Render the dashboard container and tab navigation.
+ *
+ * @returns {JSX.Element}
+ */
 export default function ManagerDashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("Menu");
@@ -28,6 +41,13 @@ export default function ManagerDashboard() {
   );
 }
 
+/**
+ * Menu management tab.
+ *
+ * Supports listing, adding, editing, and deleting menu items.
+ *
+ * @returns {JSX.Element}
+ */
 function MenuTab() {
   const [items, setItems] = useState([]);
   const [editing, setEditing] = useState(null);
@@ -98,6 +118,13 @@ function MenuTab() {
   );
 }
 
+/**
+ * Inventory management tab.
+ *
+ * Exposes a simple edit flow for updating stock quantities.
+ *
+ * @returns {JSX.Element}
+ */
 function InventoryTab() {
   const [items, setItems] = useState([]);
   const load = () => api.getInventory().then(setItems);
@@ -133,6 +160,13 @@ function InventoryTab() {
   );
 }
 
+/**
+ * Employee administration tab.
+ *
+ * Allows managers to create employees and toggle active status.
+ *
+ * @returns {JSX.Element}
+ */
 function EmployeeTab() {
   const [employees, setEmployees] = useState([]);
   const [form, setForm] = useState({ name: "", role: "Cashier" });
@@ -190,6 +224,11 @@ function EmployeeTab() {
   );
 }
 
+/**
+ * Reporting tab with date-range and operational summaries.
+ *
+ * @returns {JSX.Element}
+ */
 function ReportsTab() {
   const [start, setStart] = useState(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); });
   const [end, setEnd] = useState(() => new Date().toISOString().slice(0, 10));
@@ -246,6 +285,12 @@ function ReportsTab() {
   );
 }
 
+/**
+ * Render the selected report payload in a table or fallback view.
+ *
+ * @param {{ type: string, data: any }} props - Report payload and type.
+ * @returns {JSX.Element}
+ */
 function ReportView({ report }) {
   const { type, data } = report;
 

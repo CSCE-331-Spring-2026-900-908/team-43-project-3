@@ -1,3 +1,11 @@
+/**
+ * Order submission and retrieval routes.
+ *
+ * The POST handler creates an order, resolves modifier pricing, and updates
+ * inventory and hourly sales counters inside a transaction.
+ *
+ * @type {import("express").Router}
+ */
 import { Router } from "express";
 import pool from "../db.js";
 

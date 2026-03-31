@@ -1,3 +1,9 @@
+/**
+ * Production server entrypoint.
+ *
+ * Serves the built client bundle and falls back to `index.html` for
+ * client-side routing before starting the HTTP listener.
+ */
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";

@@ -1,7 +1,20 @@
+/**
+ * Cashier point-of-sale workspace.
+ *
+ * This screen supports quick item entry, modifier customization, quantity
+ * adjustments, and submission of the final order payload to the server.
+ *
+ * @returns {JSX.Element}
+ */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 
+/**
+ * Render the cashier ordering interface.
+ *
+ * @returns {JSX.Element}
+ */
 export default function CashierPOS() {
   const navigate = useNavigate();
   const [menu, setMenu] = useState([]);

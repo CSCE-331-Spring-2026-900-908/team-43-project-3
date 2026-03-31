@@ -1,3 +1,11 @@
+/**
+ * Application route map.
+ *
+ * This component selects the correct top-level experience for each role
+ * while keeping the portal as the shared landing page.
+ *
+ * @returns {JSX.Element}
+ */
 import { Routes, Route } from "react-router-dom";
 import Portal from "./pages/Portal";
 import CustomerKiosk from "./pages/CustomerKiosk";

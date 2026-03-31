@@ -1,3 +1,11 @@
+/**
+ * Employee management routes.
+ *
+ * These endpoints provide the manager dashboard with the data needed to
+ * list, create, and update employee records.
+ *
+ * @type {import("express").Router}
+ */
 import { Router } from "express";
 import pool from "../db.js";
 

@@ -1,3 +1,11 @@
+/**
+ * Customer self-service ordering kiosk.
+ *
+ * This view groups menu items by category, allows item customization, and
+ * presents a cart-style checkout flow for guests.
+ *
+ * @returns {JSX.Element}
+ */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
@@ -8,6 +16,11 @@ const CATEGORY_ICONS = {
   "Slush": "🧊", "Seasonal": "🌸", "Coffee": "☕",
 };
 
+/**
+ * Render the customer kiosk experience.
+ *
+ * @returns {JSX.Element}
+ */
 export default function CustomerKiosk() {
   const navigate = useNavigate();
   const [menu, setMenu] = useState([]);

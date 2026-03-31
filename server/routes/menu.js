@@ -1,3 +1,11 @@
+/**
+ * Menu-related API routes.
+ *
+ * These handlers expose CRUD operations for menu items and the supporting
+ * ingredient and modifier data used by the ordering flows.
+ *
+ * @type {import("express").Router}
+ */
 import { Router } from "express";
 import pool from "../db.js";
 

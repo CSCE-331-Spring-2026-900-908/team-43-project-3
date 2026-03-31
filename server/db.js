@@ -1,3 +1,11 @@
+/**
+ * Shared PostgreSQL connection pool.
+ *
+ * The pool is configured from environment variables and reused across all
+ * route handlers so database access stays consistent and efficient.
+ *
+ * @type {import("pg").Pool}
+ */
 import pg from "pg";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";

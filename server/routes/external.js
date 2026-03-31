@@ -1,3 +1,11 @@
+/**
+ * External service proxy routes.
+ *
+ * These endpoints isolate third-party integrations such as weather, text
+ * translation, and the optional chat assistant behind the app's API layer.
+ *
+ * @type {import("express").Router}
+ */
 import { Router } from "express";
 import dotenv from "dotenv";
 import path from "path";
