@@ -1,3 +1,9 @@
+/**
+ * Client application bootstrap.
+ *
+ * The root renders the React app inside the router so page components can
+ * handle navigation without a full page refresh.
+ */
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

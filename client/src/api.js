@@ -1,5 +1,18 @@
+/**
+ * Lightweight API wrapper for the client application.
+ *
+ * Each helper forwards to the server-side REST endpoints and normalizes
+ * error handling so components can work with plain data objects.
+ */
 const BASE = "/api";
 
+/**
+ * Perform a JSON API request and return the parsed response body.
+ *
+ * @param {string} path - API path relative to `/api`.
+ * @param {RequestInit} [opts={}] - Fetch options for the request.
+ * @returns {Promise<any>} Parsed JSON payload from the server.
+ */
 async function request(path, opts = {}) {
   const res = await fetch(`${BASE}${path}`, {
     headers: { "Content-Type": "application/json", ...opts.headers },

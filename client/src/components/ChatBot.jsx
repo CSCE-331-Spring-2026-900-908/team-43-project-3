@@ -1,6 +1,19 @@
+/**
+ * Floating chat assistant widget.
+ *
+ * The widget collects a short conversation with the user and forwards the
+ * latest message to the external chat endpoint.
+ *
+ * @returns {JSX.Element}
+ */
 import { useState } from "react";
 import { api } from "../api";
 
+/**
+ * Render the chat assistant and handle message submission.
+ *
+ * @returns {JSX.Element}
+ */
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([

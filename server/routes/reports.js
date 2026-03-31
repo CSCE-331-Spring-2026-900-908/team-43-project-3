@@ -1,3 +1,11 @@
+/**
+ * Reporting routes for sales and operational summaries.
+ *
+ * The X and Z report endpoints mirror the register-style reporting flow,
+ * while the summary endpoints expose date-range analytics for the dashboard.
+ *
+ * @type {import("express").Router}
+ */
 import { Router } from "express";
 import pool from "../db.js";
 

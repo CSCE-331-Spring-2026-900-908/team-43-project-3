@@ -1,3 +1,11 @@
+/**
+ * Public menu board display.
+ *
+ * This page refreshes menu data periodically so the displayed pricing and
+ * item list stay current for guests.
+ *
+ * @returns {JSX.Element}
+ */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
@@ -8,6 +16,11 @@ const CAT_COLORS = {
   "Slush": "#a8c8e8", "Seasonal": "#d4a6d4", "Coffee": "#c4a882",
 };
 
+/**
+ * Render the category-based menu board.
+ *
+ * @returns {JSX.Element}
+ */
 export default function MenuBoard() {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);

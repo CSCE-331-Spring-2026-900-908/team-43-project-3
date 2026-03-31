@@ -1,3 +1,11 @@
+/**
+ * Inventory management routes.
+ *
+ * These endpoints support listing stock items and adjusting inventory values
+ * from the manager dashboard.
+ *
+ * @type {import("express").Router}
+ */
 import { Router } from "express";
 import pool from "../db.js";
 

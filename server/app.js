@@ -1,3 +1,11 @@
+/**
+ * Main Express application configuration.
+ *
+ * This file loads environment variables, enables JSON and CORS handling,
+ * and mounts the feature routers under their API prefixes.
+ *
+ * @type {import("express").Express}
+ */
 import express from "express";
 import cors from "cors";
 import path from "path";

@@ -1,3 +1,11 @@
+/**
+ * Compact weather summary for the kiosk and menu board.
+ *
+ * The widget fetches current weather data once on mount and maps the WMO
+ * code to a readable description for display.
+ *
+ * @returns {JSX.Element | null}
+ */
 import { useState, useEffect } from "react";
 import { api } from "../api";
 
@@ -8,6 +16,11 @@ const WMO_CODES = {
   80: "Light Showers", 81: "Showers", 82: "Heavy Showers", 95: "Thunderstorm",
 };
 
+/**
+ * Show the current weather for the configured location.
+ *
+ * @returns {JSX.Element | null}
+ */
 export default function WeatherWidget() {
   const [weather, setWeather] = useState(null);
 
