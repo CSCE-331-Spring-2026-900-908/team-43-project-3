@@ -30,17 +30,44 @@ router.get("/weather", async (_req, res) => {
   }
 });
 
-// Translation (LibreTranslate free instance)
+// ---------- Translation (Google Translate free endpoint) ----------
+
+function googleTranslateUrl(text, src, tgt) {
+  return `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(src)}&tl=${encodeURIComponent(tgt)}&dt=t&q=${encodeURIComponent(text)}`;
+}
+
+function extractTranslation(data) {
+  if (!Array.isArray(data) || !Array.isArray(data[0])) return null;
+  return data[0].filter((s) => s && s[0]).map((s) => s[0]).join("");
+}
+
 router.post("/translate", async (req, res) => {
-  const { text, target } = req.body;
+  const { text, source, target } = req.body;
+  if (!text || !target) return res.status(400).json({ error: "text and target required" });
   try {
-    const resp = await fetch(`${process.env.TRANSLATE_API_URL || "https://libretranslate.com"}/translate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ q: text, source: "en", target: target || "es", format: "text" }),
-    });
+    const resp = await fetch(googleTranslateUrl(text, source || "en", target));
     const data = await resp.json();
-    res.json(data);
+    const translated = extractTranslation(data);
+    res.json({ translatedText: translated || text });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/translate-batch", async (req, res) => {
+  const { texts, source, target } = req.body;
+  if (!texts?.length || !target) return res.status(400).json({ error: "texts[] and target required" });
+  try {
+    const src = source || "en";
+    const separator = "\n###\n";
+    const combined = texts.join(separator);
+    const resp = await fetch(googleTranslateUrl(combined, src, target));
+    const data = await resp.json();
+    const translatedCombined = extractTranslation(data) || combined;
+    const parts = translatedCombined.split(/\n?###\n?/);
+
+    const translations = texts.map((orig, i) => (parts[i] || "").trim() || orig);
+    res.json({ translations });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
