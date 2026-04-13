@@ -11,6 +11,11 @@ import pool from "../db.js";
 
 const router = Router();
 
+/**
+ * GET / - Retrieve all inventory items.
+ * @param {express.Request} _req - HTTP request (unused).
+ * @param {express.Response} res - HTTP response with array of inventory items.
+ */
 router.get("/", async (_req, res) => {
   try {
     const { rows } = await pool.query(
@@ -22,6 +27,11 @@ router.get("/", async (_req, res) => {
   }
 });
 
+/**
+ * PUT /:id - Update inventory item (name, unit, or stock_quantity).
+ * @param {express.Request} req - HTTP request with { name?, unit?, stock_quantity? }.
+ * @param {express.Response} res - HTTP response with updated item.
+ */
 router.put("/:id", async (req, res) => {
   const { name, unit, stock_quantity } = req.body;
   try {
@@ -40,6 +50,11 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+/**
+ * POST / - Create new inventory item.
+ * @param {express.Request} req - HTTP request with { name, unit, stock_quantity? }.
+ * @param {express.Response} res - HTTP response with created item (default stock: 10000).
+ */
 router.post("/", async (req, res) => {
   const { name, unit, stock_quantity } = req.body;
   try {

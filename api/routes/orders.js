@@ -11,6 +11,11 @@ import pool from "../db.js";
 
 const router = Router();
 
+/**
+ * GET / - Retrieve orders with optional date range and limit filters.
+ * @param {express.Request} req - HTTP request with query { start?, end?, limit? } (date strings).
+ * @param {express.Response} res - HTTP response with array of orders.
+ */
 router.get("/", async (req, res) => {
   const { start, end, limit } = req.query;
   try {
@@ -28,6 +33,12 @@ router.get("/", async (req, res) => {
   }
 });
 
+/**
+ * POST / - Submit a new order with items and modifiers.
+ * Creates order, updates inventory, and increments hourly sales in a transaction.
+ * @param {express.Request} req - HTTP request with { items[], employee_id? }.
+ * @param {express.Response} res - HTTP response with { order_id, total }.
+ */
 router.post("/", async (req, res) => {
   const { items, employee_id } = req.body;
   if (!items?.length) return res.status(400).json({ error: "No items" });

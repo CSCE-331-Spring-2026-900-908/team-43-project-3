@@ -18,7 +18,11 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const router = Router();
 
-// Weather (Open-Meteo – free, no key)
+/**
+ * GET /weather - Fetch current weather for configured location.
+ * @param {express.Request} _req - HTTP request (unused).
+ * @param {express.Response} res - HTTP response with weather data.
+ */
 router.get("/weather", async (_req, res) => {
   try {
     const lat = process.env.WEATHER_LAT || "30.6280";
@@ -34,15 +38,32 @@ router.get("/weather", async (_req, res) => {
 
 // ---------- Translation (Google Translate free endpoint) ----------
 
+/**
+ * Build a Google Translate API URL for translating text.
+ * @param {string} text - Text to translate.
+ * @param {string} src - Source language code (e.g., 'en').
+ * @param {string} tgt - Target language code (e.g., 'es').
+ * @returns {string} Google Translate API URL.
+ */
 function googleTranslateUrl(text, src, tgt) {
   return `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(src)}&tl=${encodeURIComponent(tgt)}&dt=t&q=${encodeURIComponent(text)}`;
 }
 
+/**
+ * Extract translated text from Google Translate API response.
+ * @param {any} data - Parsed JSON response from Google Translate API.
+ * @returns {string|null} Translated text or null if extraction fails.
+ */
 function extractTranslation(data) {
   if (!Array.isArray(data) || !Array.isArray(data[0])) return null;
   return data[0].filter((s) => s && s[0]).map((s) => s[0]).join("");
 }
 
+/**
+ * POST /translate - Translate a single text string to target language.
+ * @param {express.Request} req - HTTP request with { text, source?, target }.
+ * @param {express.Response} res - HTTP response with { translatedText }.
+ */
 router.post("/translate", async (req, res) => {
   const { text, source, target } = req.body;
   if (!text || !target) return res.status(400).json({ error: "text and target required" });
@@ -56,6 +77,11 @@ router.post("/translate", async (req, res) => {
   }
 });
 
+/**
+ * POST /translate-batch - Translate multiple texts to target language.
+ * @param {express.Request} req - HTTP request with { texts[], source?, target }.
+ * @param {express.Response} res - HTTP response with { translations[] }.
+ */
 router.post("/translate-batch", async (req, res) => {
   const { texts, source, target } = req.body;
   if (!texts?.length || !target) return res.status(400).json({ error: "texts[] and target required" });
@@ -77,6 +103,12 @@ router.post("/translate-batch", async (req, res) => {
 
 // ---------- AI Chatbot ----------
 
+/**
+ * POST /chat - AI-powered chatbot endpoint for menu inquiries.
+ * Tries OpenAI, then Gemini, then falls back to rule-based demo mode.
+ * @param {express.Request} req - HTTP request with { message }.
+ * @param {express.Response} res - HTTP response with { reply }.
+ */
 router.post("/chat", async (req, res) => {
   const { message } = req.body;
   try {
