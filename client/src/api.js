@@ -50,6 +50,7 @@ export const api = {
   getProductUsage:   (s, e)       => request(`/reports/product-usage?start=${s}&end=${e}`),
 
   getWeather:        ()           => request("/external/weather"),
-  translate:         (text, tgt)  => request("/external/translate", { method: "POST", body: JSON.stringify({ text, target: tgt }) }),
+  translate:         (text, tgt, src) => request("/external/translate", { method: "POST", body: JSON.stringify({ text, target: tgt, source: src }) }),
+  translateBatch:    (texts, tgt, src) => request("/external/translate-batch", { method: "POST", body: JSON.stringify({ texts, target: tgt, source: src }) }),
   chat:              (message)    => request("/external/chat", { method: "POST", body: JSON.stringify({ message }) }),
 };
