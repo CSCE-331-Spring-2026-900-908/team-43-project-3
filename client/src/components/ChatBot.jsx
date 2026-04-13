@@ -32,3 +32,33 @@ export default function ChatBot() {
       setLoading(false);
     }
   };
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} style={styles.fab} aria-label="Open chat assistant">
+        💬
+      </button>
+    );
+  }
+
+  return (
+    <div style={styles.panel}>
+      <div style={styles.header}>
+        <span style={{ fontWeight: 600 }}>Tea Assistant</span>
+        <button onClick={() => setOpen(false)} style={styles.close}>✕</button>
+      </div>
+      <div style={styles.messages}>
+        {messages.map((m, i) => (
+          <div key={i} style={{ ...styles.msg, alignSelf: m.from === "user" ? "flex-end" : "flex-start", background: m.from === "user" ? "var(--primary)" : "#f0ebe4", color: m.from === "user" ? "#fff" : "var(--text)" }}>
+            {m.text}
+          </div>
+        ))}
+        {loading && <div style={{ ...styles.msg, alignSelf: "flex-start", background: "#f0ebe4" }}>Thinking...</div>}
+      </div>
+      <div style={styles.inputRow}>
+        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} placeholder="Ask about our menu..." style={styles.input} />
+        <button onClick={send} className="btn-primary" style={{ padding: "0.5rem 1rem" }}>Send</button>
+      </div>
+    </div>
+  );
+}
