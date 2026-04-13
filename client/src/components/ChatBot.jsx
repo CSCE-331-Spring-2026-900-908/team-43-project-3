@@ -62,3 +62,14 @@ export default function ChatBot() {
     </div>
   );
 }
+
+const styles = {
+  fab: { position: "fixed", bottom: 24, right: 24, width: 56, height: 56, borderRadius: "50%", background: "var(--accent)", color: "#fff", fontSize: "1.5rem", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.2)", border: "none", zIndex: 1000 },
+  panel: { position: "fixed", bottom: 24, right: 24, width: 360, maxHeight: 500, borderRadius: "var(--radius)", background: "var(--card)", boxShadow: "0 8px 32px rgba(0,0,0,0.15)", display: "flex", flexDirection: "column", zIndex: 1000, overflow: "hidden" },
+  header: { padding: "0.75rem 1rem", background: "var(--accent)", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" },
+  close: { background: "none", border: "none", color: "#fff", fontSize: "1.1rem", cursor: "pointer" },
+  messages: { flex: 1, padding: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem", overflowY: "auto", maxHeight: 340 },
+  msg: { padding: "0.5rem 0.75rem", borderRadius: 12, maxWidth: "85%", fontSize: "0.9rem", lineHeight: 1.4 },
+  inputRow: { padding: "0.5rem", borderTop: "1px solid var(--border)", display: "flex", gap: "0.5rem" },
+  input: { flex: 1, border: "1px solid var(--border)", borderRadius: 8, padding: "0.5rem 0.75rem", fontSize: "0.9rem" },
+};
