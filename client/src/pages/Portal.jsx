@@ -11,11 +11,6 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import WeatherWidget from "../components/WeatherWidget";
 
-/**
- * Render the navigation portal to each role-specific interface.
- *
- * @returns {JSX.Element}
- */
 export default function Portal() {
   const views = [
     { to: "/customer", label: "Customer Kiosk", desc: "Self-service ordering", icon: "🧋" },
