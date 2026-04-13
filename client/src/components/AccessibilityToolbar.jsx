@@ -16,3 +16,14 @@ export default function AccessibilityToolbar() {
   const [magState, setMagState] = useState("off");
   const [highContrast, setHighContrast] = useState(false);
   const [textLevel, setTextLevel] = useState(0);
+
+  // Text scaling
+  useEffect(() => {
+    const px = TEXT_SIZES[textLevel].px;
+    document.documentElement.style.fontSize = px === 16 ? "" : `${px}px`;
+  }, [textLevel]);
+
+  // High contrast
+  useEffect(() => {
+    document.body.classList.toggle("high-contrast", highContrast);
+  }, [highContrast]);
