@@ -90,3 +90,47 @@ export default function AccessibilityToolbar() {
       if (handler) document.removeEventListener("click", handler, true);
     };
   }, [magState]);
+
+  const toggleMagnifier = () => {
+    if (magState === "off") {
+      setMagState("picking");
+    } else {
+      const content = document.getElementById("app-content");
+      if (content) {
+        content.style.transform = "";
+        content.style.transformOrigin = "";
+      }
+      document.body.style.cursor = "";
+      setMagState("off");
+    }
+  };
+
+  const magLabel = magState === "off" ? "Activate" : "Deactivate";
+  const magActive = magState !== "off";
+
+  return (
+    <>
+      {/* Banner in magnifier mode */}
+      {magState === "picking" && (
+        <div style={st.zoomBanner} className="accessibility-toolbar">
+          🔍 Magnifier active — click any area to zoom in
+        </div>
+      )}
+      {magState === "zoomed" && (
+        <div style={st.zoomBanner} className="accessibility-toolbar">
+          🔍 Zoomed in — click to zoom out and pick another area
+        </div>
+      )}
+
+      {/* Collapsed FAB */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          style={st.fab}
+          className="accessibility-toolbar"
+          aria-label="Accessibility settings"
+          title="Accessibility"
+        >
+          ♿
+        </button>
+      )}
