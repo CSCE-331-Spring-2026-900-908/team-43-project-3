@@ -81,16 +81,33 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  const { name, category, base_price } = req.body;
+  const { name, category, base_price, ingredients } = req.body;
+  const client = await pool.connect();
   try {
-    const { rows } = await pool.query(
+    await client.query("BEGIN");
+    const { rows } = await client.query(
       "UPDATE menu_items SET name=$1, category=$2, base_price=$3 WHERE menu_item_id=$4 RETURNING *",
       [name, category, base_price, req.params.id]
     );
-    if (rows.length === 0) return res.status(404).json({ error: "Not found" });
+    if (rows.length === 0) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Not found" }); }
+
+    if (ingredients !== undefined) {
+      await client.query("DELETE FROM menu_item_ingredients WHERE menu_item_id = $1", [req.params.id]);
+      for (const ing of ingredients) {
+        await client.query(
+          "INSERT INTO menu_item_ingredients (menu_item_id, inventory_item_id, quantity_used) VALUES ($1, $2, $3)",
+          [req.params.id, ing.inventory_item_id, ing.quantity_used]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
     res.json(rows[0]);
   } catch (err) {
+    await client.query("ROLLBACK");
     res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
   }
 });
 
