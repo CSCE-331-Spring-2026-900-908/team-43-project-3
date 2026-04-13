@@ -9,11 +9,6 @@
 import { useState } from "react";
 import { api } from "../api";
 
-/**
- * Render the chat assistant and handle message submission.
- *
- * @returns {JSX.Element}
- */
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -22,6 +17,12 @@ export default function ChatBot() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Send user message to chat API and append response.
+   * Prevents sending while loading or with empty input.
+   * @async
+   * @returns {Promise<void>}
+   */
   const send = async () => {
     if (!input.trim() || loading) return;
     const userMsg = input.trim();

@@ -11,7 +11,12 @@ import pool from "../db.js";
 
 const router = Router();
 
-// X-Report: hourly sales for today (no side effects)
+/**
+ * GET /x-report - Retrieve hourly sales summary for today (no destructive side effects).
+ * Returns closed: true if Z-Report already generated today.
+ * @param {express.Request} _req - HTTP request (unused).
+ * @param {express.Response} res - HTTP response with { closed, hours[], totals }.
+ */
 router.get("/x-report", async (_req, res) => {
   try {
     const zCheck = await pool.query(
@@ -54,7 +59,12 @@ router.get("/x-report", async (_req, res) => {
   }
 });
 
-// Z-Report: close out day, reset to zero
+/**
+ * POST /z-report - Close out day by logging totals and resetting hourly sales.
+ * Returns error 409 if already generated for today.
+ * @param {express.Request} _req - HTTP request (unused).
+ * @param {express.Response} res - HTTP response with { hours[], totals } or error.
+ */
 router.post("/z-report", async (_req, res) => {
   try {
     const zCheck = await pool.query(
@@ -102,7 +112,11 @@ router.post("/z-report", async (_req, res) => {
   }
 });
 
-// Reset Z-Report (testing only)
+/**
+ * POST /reset-z-report - Delete today's Z-Report log entry (testing only).
+ * @param {express.Request} _req - HTTP request (unused).
+ * @param {express.Response} res - HTTP response with { reset: true }.
+ */
 router.post("/reset-z-report", async (_req, res) => {
   try {
     await pool.query("DELETE FROM z_report_log WHERE report_date = CURRENT_DATE");
@@ -112,7 +126,11 @@ router.post("/reset-z-report", async (_req, res) => {
   }
 });
 
-// Sales summary
+/**
+ * GET /sales-summary - Retrieve order count, total revenue, and average order for date range.
+ * @param {express.Request} req - HTTP request with query { start, end } (date strings).
+ * @param {express.Response} res - HTTP response with { order_count, revenue, avg_order }.
+ */
 router.get("/sales-summary", async (req, res) => {
   const { start, end } = req.query;
   try {
@@ -130,7 +148,11 @@ router.get("/sales-summary", async (req, res) => {
   }
 });
 
-// Sales by item
+/**
+ * GET /sales-by-item - Retrieve item-level sales metrics for date range.
+ * @param {express.Request} req - HTTP request with query { start, end } (date strings).
+ * @param {express.Response} res - HTTP response with array of { menu_item_id, name, category, total_qty, total_revenue }.
+ */
 router.get("/sales-by-item", async (req, res) => {
   const { start, end } = req.query;
   try {

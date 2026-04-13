@@ -23,11 +23,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+#app-content {
+  transition: transform 0.3s ease;
+}
+
 button {
   cursor: pointer;
   border: none;
   font-family: inherit;
   font-size: inherit;
+  color: inherit;
   transition: all 0.15s ease;
 }
 
@@ -92,3 +97,58 @@ th { font-weight: 600; color: var(--text-light); font-size: 0.85rem; text-transf
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+/* ========= HIGH CONTRAST MODE ========= */
+body.high-contrast {
+  --bg: #000000;
+  --card: #1a1a1a;
+  --text: #ffffff;
+  --text-light: #cccccc;
+  --border: #555555;
+  --primary: #ffcc00;
+  --primary-dark: #e6b800;
+  --accent: #ffcc00;
+  --shadow: 0 2px 12px rgba(255,255,255,0.1);
+}
+
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background: #111;
+  color: #fff;
+  border-color: #888;
+}
+
+body.high-contrast .btn-primary {
+  background: #ffcc00;
+  color: #000;
+}
+
+body.high-contrast .btn-outline {
+  border-color: #ffcc00;
+  color: #ffcc00;
+}
+body.high-contrast .btn-outline:hover {
+  background: #ffcc00;
+  color: #000;
+}
+
+body.high-contrast .card {
+  border: 1px solid #555;
+}
+
+body.high-contrast table th {
+  color: #ffcc00;
+}
+
+body.high-contrast a {
+  color: #66bbff;
+}
+
+body.high-contrast .btn-primary {
+  color: #000;
+}
+
+body.high-contrast .btn-danger {
+  color: #fff;
+}

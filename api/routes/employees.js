@@ -11,6 +11,11 @@ import pool from "../db.js";
 
 const router = Router();
 
+/**
+ * GET / - Retrieve all employees.
+ * @param {express.Request} _req - HTTP request (unused).
+ * @param {express.Response} res - HTTP response with array of employees.
+ */
 router.get("/", async (_req, res) => {
   try {
     const { rows } = await pool.query(
@@ -22,6 +27,11 @@ router.get("/", async (_req, res) => {
   }
 });
 
+/**
+ * POST / - Create new employee.
+ * @param {express.Request} req - HTTP request with { name, role? }.
+ * @param {express.Response} res - HTTP response with created employee (default role: Cashier).
+ */
 router.post("/", async (req, res) => {
   const { name, role } = req.body;
   try {
@@ -35,6 +45,11 @@ router.post("/", async (req, res) => {
   }
 });
 
+/**
+ * PUT /:id - Update employee (name, role, or active status).
+ * @param {express.Request} req - HTTP request with { name?, role?, is_active? }.
+ * @param {express.Response} res - HTTP response with updated employee.
+ */
 router.put("/:id", async (req, res) => {
   const { name, role, is_active } = req.body;
   try {

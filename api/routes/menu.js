@@ -11,6 +11,11 @@ import pool from "../db.js";
 
 const router = Router();
 
+/**
+ * GET / - Retrieve all menu items with ingredient counts.
+ * @param {express.Request} _req - HTTP request (unused).
+ * @param {express.Response} res - HTTP response with array of menu items.
+ */
 router.get("/", async (_req, res) => {
   try {
     const { rows } = await pool.query(
@@ -28,6 +33,11 @@ router.get("/", async (_req, res) => {
   }
 });
 
+/**
+ * GET /:id - Retrieve specific menu item with ingredient details.
+ * @param {express.Request} req - HTTP request with menu_item_id in URL.
+ * @param {express.Response} res - HTTP response with menu item and ingredients.
+ */
 router.get("/:id", async (req, res) => {
   try {
     const item = await pool.query(
@@ -50,6 +60,11 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/**
+ * POST / - Create new menu item with optional ingredients.
+ * @param {express.Request} req - HTTP request with { name, category, base_price, ingredients? }.
+ * @param {express.Response} res - HTTP response with created item.
+ */
 router.post("/", async (req, res) => {
   const { name, category, base_price, ingredients } = req.body;
   const client = await pool.connect();
@@ -80,20 +95,47 @@ router.post("/", async (req, res) => {
   }
 });
 
+/**
+ * PUT /:id - Update menu item and optionally replace ingredients.
+ * @param {express.Request} req - HTTP request with { name, category, base_price, ingredients? }.
+ * @param {express.Response} res - HTTP response with updated item.
+ */
 router.put("/:id", async (req, res) => {
-  const { name, category, base_price } = req.body;
+  const { name, category, base_price, ingredients } = req.body;
+  const client = await pool.connect();
   try {
-    const { rows } = await pool.query(
+    await client.query("BEGIN");
+    const { rows } = await client.query(
       "UPDATE menu_items SET name=$1, category=$2, base_price=$3 WHERE menu_item_id=$4 RETURNING *",
       [name, category, base_price, req.params.id]
     );
-    if (rows.length === 0) return res.status(404).json({ error: "Not found" });
+    if (rows.length === 0) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Not found" }); }
+
+    if (ingredients !== undefined) {
+      await client.query("DELETE FROM menu_item_ingredients WHERE menu_item_id = $1", [req.params.id]);
+      for (const ing of ingredients) {
+        await client.query(
+          "INSERT INTO menu_item_ingredients (menu_item_id, inventory_item_id, quantity_used) VALUES ($1, $2, $3)",
+          [req.params.id, ing.inventory_item_id, ing.quantity_used]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
     res.json(rows[0]);
   } catch (err) {
+    await client.query("ROLLBACK");
     res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
   }
 });
 
+/**
+ * DELETE /:id - Delete menu item and all associated ingredients.
+ * @param {express.Request} req - HTTP request with menu_item_id in URL.
+ * @param {express.Response} res - HTTP response with { deleted: true }.
+ */
 router.delete("/:id", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -111,6 +153,11 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+/**
+ * GET /:id/modifiers - Retrieve modifiers and choices for a menu item.
+ * @param {express.Request} req - HTTP request with menu_item_id in URL.
+ * @param {express.Response} res - HTTP response with array of { modifier_id, name, choices[] }.
+ */
 router.get("/:id/modifiers", async (req, res) => {
   try {
     const { rows } = await pool.query(

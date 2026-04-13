@@ -1,3 +1,8 @@
+/**
+ * Vite configuration for the ShareTea client application.
+ *
+ * Sets up the React plugin and local API proxy for development.
+ */
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 

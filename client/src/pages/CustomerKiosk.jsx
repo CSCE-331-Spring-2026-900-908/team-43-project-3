@@ -9,6 +9,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { useTranslation } from "../contexts/TranslationContext";
 import ChatBot from "../components/ChatBot";
 
 const CATEGORY_ICONS = {
@@ -16,13 +17,9 @@ const CATEGORY_ICONS = {
   "Slush": "🧊", "Seasonal": "🌸", "Coffee": "☕",
 };
 
-/**
- * Render the customer kiosk experience.
- *
- * @returns {JSX.Element}
- */
 export default function CustomerKiosk() {
   const navigate = useNavigate();
+  const { t, translateBatch, lang } = useTranslation();
   const [menu, setMenu] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCat, setActiveCat] = useState(null);
@@ -32,6 +29,7 @@ export default function CustomerKiosk() {
   const [choices, setChoices] = useState({});
   const [qty, setQty] = useState(1);
   const [orderPlaced, setOrderPlaced] = useState(null);
+  const [reviewing, setReviewing] = useState(false);
 
   useEffect(() => {
     api.getMenu().then((items) => {
@@ -42,10 +40,30 @@ export default function CustomerKiosk() {
     });
   }, []);
 
+  useEffect(() => {
+    const strs = [
+      "Self-Service Kiosk", "Your Order", "Place Order", "Review Order", "Total",
+      "Tap an item to get started", "New Order", "Order Placed!", "← Back",
+      "Add to Order", "Cancel", "Qty:", "Continue Shopping", "Confirm & Place Order",
+      "Review Your Order", "Remove", "Order Summary",
+      ...menu.map((m) => m.name),
+      ...categories,
+    ];
+    translateBatch(strs);
+  }, [lang, menu, categories, translateBatch]);
+
+  /**
+   * Open modifier selection dialog for item.
+   * @async
+   * @param {Object} item - Menu item to customize.
+   */
   const openCustomize = async (item) => {
     try {
       const mods = await api.getModifiers(item.menu_item_id);
       setModifiers(mods);
+      if (mods.length > 0) {
+        translateBatch(mods.flatMap((m) => [m.name, ...m.choices.map((c) => c.label)]));
+      }
     } catch {
       setModifiers([]);
     }
@@ -54,6 +72,9 @@ export default function CustomerKiosk() {
     setCustomizing(item);
   };
 
+  /**
+   * Add customized item with selected modifiers to cart.
+   */
   const addToCart = () => {
     const selectedChoiceIds = Object.values(choices).flat().filter(Boolean).map(Number);
     let adj = 0;
@@ -81,9 +102,29 @@ export default function CustomerKiosk() {
     setCustomizing(null);
   };
 
+  /**
+   * Remove cart line item at index.
+   * @param {number} idx - Cart line index.
+   */
   const removeFromCart = (idx) => setCart((c) => c.filter((_, i) => i !== idx));
+  /**
+   * Adjust cart line quantity by delta. Remove if quantity becomes 0.
+   * @param {number} idx - Cart line index.
+   * @param {number} delta - Quantity change (+1 or -1).
+   */
+  const updateCartQty = (idx, delta) => {
+    setCart((prev) => prev.map((item, i) => {
+      if (i !== idx) return item;
+      const newQty = item.quantity + delta;
+      return newQty <= 0 ? null : { ...item, quantity: newQty };
+    }).filter(Boolean));
+  };
   const cartTotal = cart.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
 
+  /**
+   * Submit cart as order and show confirmation screen.
+   * @async
+   */
   const placeOrder = async () => {
     try {
       const result = await api.submitOrder({
@@ -95,6 +136,7 @@ export default function CustomerKiosk() {
       });
       setOrderPlaced(result);
       setCart([]);
+      setReviewing(false);
     } catch (err) {
       alert("Order failed: " + err.message);
     }
@@ -102,16 +144,66 @@ export default function CustomerKiosk() {
 
   if (orderPlaced) {
     return (
-      <div style={s.page}>
-        <div style={{ ...s.centered, gap: "1.5rem" }}>
+      <div style={st.page}>
+        <div style={{ ...st.centered, gap: "1.5rem" }}>
           <span style={{ fontSize: "4rem" }}>✅</span>
-          <h1>Order Placed!</h1>
+          <h1>{t("Order Placed!")}</h1>
           <p style={{ fontSize: "1.3rem", color: "var(--text-light)" }}>
-            Order #{orderPlaced.order_id} — Total: ${orderPlaced.total.toFixed(2)}
+            Order #{orderPlaced.order_id} — {t("Total")}: ${orderPlaced.total.toFixed(2)}
           </p>
           <button className="btn-primary" style={{ fontSize: "1.2rem", padding: "1rem 3rem" }} onClick={() => setOrderPlaced(null)}>
-            New Order
+            {t("New Order")}
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ======================== CART REVIEW SCREEN ======================== */
+  if (reviewing) {
+    return (
+      <div style={st.page}>
+        <header style={st.header}>
+          <h1 style={st.logo}>ShareTea</h1>
+          <span style={st.headerSub}>{t("Review Your Order")}</span>
+        </header>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "1.5rem", maxWidth: 700, width: "100%", margin: "0 auto", overflow: "auto" }}>
+          <h2 style={{ fontSize: "1.3rem", marginBottom: "1rem" }}>{t("Order Summary")}</h2>
+
+          {cart.map((c, i) => (
+            <div key={i} style={st.reviewItem}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>{t(c.name)}</div>
+                {c.choiceLabels.length > 0 && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--text-light)", marginTop: 2 }}>{c.choiceLabels.map((l) => t(l)).join(", ")}</div>
+                )}
+                <div style={{ fontSize: "0.9rem", color: "var(--primary-dark)", marginTop: 4 }}>${c.unitPrice.toFixed(2)} each</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <button onClick={() => updateCartQty(i, -1)} style={st.qtyBtn}>−</button>
+                <span style={{ fontSize: "1.1rem", fontWeight: 700, minWidth: 30, textAlign: "center" }}>{c.quantity}</span>
+                <button onClick={() => updateCartQty(i, 1)} style={st.qtyBtn}>+</button>
+              </div>
+              <div style={{ fontWeight: 700, fontSize: "1.1rem", minWidth: 70, textAlign: "right" }}>${(c.unitPrice * c.quantity).toFixed(2)}</div>
+              <button onClick={() => removeFromCart(i)} style={{ background: "none", border: "none", color: "var(--danger)", fontWeight: 700, fontSize: "1.2rem", marginLeft: "0.5rem" }}>✕</button>
+            </div>
+          ))}
+
+          <div style={{ borderTop: "3px solid var(--border)", marginTop: "1rem", paddingTop: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.4rem", fontWeight: 700 }}>
+              <span>{t("Total")}</span>
+              <span>${cartTotal.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+            <button className="btn-outline" onClick={() => setReviewing(false)} style={{ flex: 1, padding: "0.9rem", fontSize: "1.05rem" }}>
+              {t("Continue Shopping")}
+            </button>
+            <button className="btn-primary" onClick={placeOrder} style={{ flex: 1, padding: "0.9rem", fontSize: "1.05rem" }} disabled={cart.length === 0}>
+              {t("Confirm & Place Order")}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -120,62 +212,62 @@ export default function CustomerKiosk() {
   const filtered = menu.filter((i) => i.category === activeCat);
 
   return (
-    <div style={s.page}>
-      <header style={s.header}>
-        <button onClick={() => navigate("/")} style={s.backBtn} aria-label="Back to portal">← Back</button>
-        <h1 style={s.logo}>ShareTea</h1>
-        <span style={s.headerSub}>Self-Service Kiosk</span>
+    <div style={st.page}>
+      <header style={st.header}>
+        <button onClick={() => navigate("/")} style={st.backBtn} aria-label="Back to portal">{t("← Back")}</button>
+        <h1 style={st.logo}>ShareTea</h1>
+        <span style={st.headerSub}>{t("Self-Service Kiosk")}</span>
       </header>
 
-      <div style={s.body}>
+      <div style={st.body}>
         {/* Category sidebar */}
-        <nav style={s.sidebar}>
+        <nav style={st.sidebar}>
           {categories.map((cat) => (
             <button key={cat} onClick={() => setActiveCat(cat)}
-              style={{ ...s.catBtn, ...(cat === activeCat ? s.catBtnActive : {}) }}>
+              style={{ ...st.catBtn, ...(cat === activeCat ? st.catBtnActive : {}) }}>
               <span style={{ fontSize: "1.5rem" }}>{CATEGORY_ICONS[cat] || "🧋"}</span>
-              <span>{cat}</span>
+              <span>{t(cat)}</span>
             </button>
           ))}
         </nav>
 
         {/* Menu grid */}
-        <main style={s.menuGrid}>
+        <main style={st.menuGrid}>
           {filtered.map((item) => (
-            <button key={item.menu_item_id} style={s.menuCard} onClick={() => openCustomize(item)}>
-              <div style={s.menuCardIcon}>{CATEGORY_ICONS[item.category] || "🧋"}</div>
-              <div style={s.menuCardName}>{item.name}</div>
-              <div style={s.menuCardPrice}>${parseFloat(item.base_price).toFixed(2)}</div>
+            <button key={item.menu_item_id} style={st.menuCard} onClick={() => openCustomize(item)}>
+              <div style={st.menuCardIcon}>{CATEGORY_ICONS[item.category] || "🧋"}</div>
+              <div style={st.menuCardName}>{t(item.name)}</div>
+              <div style={st.menuCardPrice}>${parseFloat(item.base_price).toFixed(2)}</div>
             </button>
           ))}
         </main>
 
         {/* Cart panel */}
-        <aside style={s.cartPanel}>
-          <h2 style={{ fontSize: "1.1rem", marginBottom: "0.75rem" }}>Your Order</h2>
-          {cart.length === 0 && <p style={{ color: "var(--text-light)", fontSize: "0.9rem" }}>Tap an item to get started</p>}
+        <aside style={st.cartPanel}>
+          <h2 style={{ fontSize: "1.1rem", marginBottom: "0.75rem" }}>{t("Your Order")}</h2>
+          {cart.length === 0 && <p style={{ color: "var(--text-light)", fontSize: "0.9rem" }}>{t("Tap an item to get started")}</p>}
           <div style={{ flex: 1, overflowY: "auto" }}>
             {cart.map((c, i) => (
-              <div key={i} style={s.cartItem}>
+              <div key={i} style={st.cartItem}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: "0.95rem" }}>{c.name} x{c.quantity}</div>
+                  <div style={{ fontWeight: 600, fontSize: "0.95rem" }}>{t(c.name)} x{c.quantity}</div>
                   {c.choiceLabels.length > 0 && (
-                    <div style={{ fontSize: "0.8rem", color: "var(--text-light)" }}>{c.choiceLabels.join(", ")}</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-light)" }}>{c.choiceLabels.map((l) => t(l)).join(", ")}</div>
                   )}
                 </div>
                 <div style={{ fontWeight: 600 }}>${(c.unitPrice * c.quantity).toFixed(2)}</div>
-                <button onClick={() => removeFromCart(i)} style={s.removeBtn}>✕</button>
+                <button onClick={() => removeFromCart(i)} style={st.removeBtn}>✕</button>
               </div>
             ))}
           </div>
-          <div style={s.cartFooter}>
+          <div style={st.cartFooter}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem", fontWeight: 700 }}>
-              <span>Total</span>
+              <span>{t("Total")}</span>
               <span>${cartTotal.toFixed(2)}</span>
             </div>
-            <button className="btn-primary" disabled={cart.length === 0} onClick={placeOrder}
+            <button className="btn-primary" disabled={cart.length === 0} onClick={() => setReviewing(true)}
               style={{ width: "100%", padding: "0.9rem", fontSize: "1.1rem", marginTop: "0.75rem", opacity: cart.length === 0 ? 0.5 : 1 }}>
-              Place Order
+              {t("Review Order")}
             </button>
           </div>
         </aside>
@@ -183,22 +275,22 @@ export default function CustomerKiosk() {
 
       {/* Customization modal */}
       {customizing && (
-        <div style={s.overlay} onClick={() => setCustomizing(null)}>
-          <div style={s.modal} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginBottom: "0.5rem" }}>{customizing.name}</h2>
+        <div style={st.overlay} onClick={() => setCustomizing(null)}>
+          <div style={st.modal} onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginBottom: "0.5rem" }}>{t(customizing.name)}</h2>
             <p style={{ color: "var(--text-light)" }}>Base: ${parseFloat(customizing.base_price).toFixed(2)}</p>
 
             {modifiers.map((mod) => (
               <div key={mod.modifier_id} style={{ marginTop: "1rem" }}>
-                <h3 style={{ fontSize: "0.95rem", marginBottom: "0.5rem" }}>{mod.name}</h3>
+                <h3 style={{ fontSize: "0.95rem", marginBottom: "0.5rem" }}>{t(mod.name)}</h3>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                   {mod.choices.map((c) => {
                     const sel = choices[mod.modifier_id] === c.choice_id;
                     return (
                       <button key={c.choice_id}
                         onClick={() => setChoices((prev) => ({ ...prev, [mod.modifier_id]: sel ? null : c.choice_id }))}
-                        style={{ ...s.choiceBtn, ...(sel ? s.choiceBtnSel : {}) }}>
-                        {c.label}
+                        style={{ ...st.choiceBtn, ...(sel ? st.choiceBtnSel : {}) }}>
+                        {t(c.label)}
                         {c.price_delta > 0 && ` (+$${c.price_delta.toFixed(2)})`}
                       </button>
                     );
@@ -208,15 +300,15 @@ export default function CustomerKiosk() {
             ))}
 
             <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-              <span style={{ fontWeight: 600 }}>Qty:</span>
-              <button onClick={() => setQty(Math.max(1, qty - 1))} style={s.qtyBtn}>−</button>
+              <span style={{ fontWeight: 600 }}>{t("Qty:")}</span>
+              <button onClick={() => setQty(Math.max(1, qty - 1))} style={st.qtyBtn}>−</button>
               <span style={{ fontSize: "1.2rem", fontWeight: 700, minWidth: 30, textAlign: "center" }}>{qty}</span>
-              <button onClick={() => setQty(qty + 1)} style={s.qtyBtn}>+</button>
+              <button onClick={() => setQty(qty + 1)} style={st.qtyBtn}>+</button>
             </div>
 
             <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.75rem" }}>
-              <button className="btn-outline" onClick={() => setCustomizing(null)} style={{ flex: 1 }}>Cancel</button>
-              <button className="btn-primary" onClick={addToCart} style={{ flex: 1 }}>Add to Order</button>
+              <button className="btn-outline" onClick={() => setCustomizing(null)} style={{ flex: 1 }}>{t("Cancel")}</button>
+              <button className="btn-primary" onClick={addToCart} style={{ flex: 1 }}>{t("Add to Order")}</button>
             </div>
           </div>
         </div>
@@ -227,7 +319,7 @@ export default function CustomerKiosk() {
   );
 }
 
-const s = {
+const st = {
   page: { height: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)", overflow: "hidden" },
   centered: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" },
   header: { display: "flex", alignItems: "center", gap: "1rem", padding: "0.75rem 1.5rem", background: "var(--accent)", color: "#fff" },
@@ -252,4 +344,5 @@ const s = {
   choiceBtn: { padding: "0.5rem 1rem", borderRadius: 20, border: "2px solid var(--border)", background: "var(--bg)", fontWeight: 500, fontSize: "0.9rem" },
   choiceBtnSel: { borderColor: "var(--primary)", background: "var(--primary)", color: "#fff" },
   qtyBtn: { width: 40, height: 40, borderRadius: "50%", border: "2px solid var(--border)", background: "var(--bg)", fontWeight: 700, fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center" },
+  reviewItem: { display: "flex", alignItems: "center", gap: "1rem", padding: "1rem 0", borderBottom: "1px solid var(--border)" },
 };
