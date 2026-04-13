@@ -16,11 +16,6 @@ const WMO_CODES = {
   80: "Light Showers", 81: "Showers", 82: "Heavy Showers", 95: "Thunderstorm",
 };
 
-/**
- * Show the current weather for the configured location.
- *
- * @returns {JSX.Element | null}
- */
 export default function WeatherWidget() {
   const [weather, setWeather] = useState(null);
 
