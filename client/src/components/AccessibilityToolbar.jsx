@@ -61,3 +61,32 @@ export default function AccessibilityToolbar() {
       if (handler) document.removeEventListener("click", handler, true);
     };
   }, [magState]);
+
+  // --- Zoomed mode: click anywhere zooms out and returns to picking (not off) ---
+  useEffect(() => {
+    if (magState !== "zoomed") return;
+    document.body.style.cursor = "zoom-out";
+
+    let handler;
+    const timer = setTimeout(() => {
+      handler = (e) => {
+        if (e.target.closest(".accessibility-toolbar")) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        const content = document.getElementById("app-content");
+        if (content) {
+          content.style.transform = "";
+          content.style.transformOrigin = "";
+        }
+        setMagState("picking"); // stay in magnifier mode
+      };
+      document.addEventListener("click", handler, true);
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
+      document.body.style.cursor = "";
+      if (handler) document.removeEventListener("click", handler, true);
+    };
+  }, [magState]);
