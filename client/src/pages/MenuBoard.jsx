@@ -24,6 +24,9 @@ export default function MenuBoard() {
   const [grouped, setGrouped] = useState({});
 
   useEffect(() => {
+    /**
+     * Fetch and group menu items by category. Auto-refresh every 60 seconds.
+     */    
     const load = () => {
       api.getMenu().then((data) => {
         setItems(data);

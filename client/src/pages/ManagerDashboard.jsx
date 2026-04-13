@@ -44,6 +44,10 @@ export default function ManagerDashboard() {
 }
 
 /* ======================== MENU TAB ======================== */
+/**
+ * Menu item CRUD interface with ingredient management.
+ * @returns {JSX.Element} Menu management tab.
+ */
 function MenuTab() {
   const { t, translateBatch, lang } = useTranslation();
   const [items, setItems] = useState([]);
@@ -197,6 +201,10 @@ function MenuTab() {
 }
 
 /* ======================== INVENTORY TAB ======================== */
+/**
+ * Inventory stock management interface.
+ * @returns {JSX.Element} Inventory management tab.
+ */
 function InventoryTab() {
   const { t, translateBatch, lang } = useTranslation();
   const [items, setItems] = useState([]);
@@ -238,6 +246,10 @@ function InventoryTab() {
 }
 
 /* ======================== EMPLOYEE TAB ======================== */
+/**
+ * Employee roster management with add/deactivate controls.
+ * @returns {JSX.Element} Employee management tab.
+ */
 function EmployeeTab() {
   const { t, translateBatch, lang } = useTranslation();
   const [employees, setEmployees] = useState([]);
@@ -301,6 +313,10 @@ function EmployeeTab() {
 }
 
 /* ======================== REPORTS TAB ======================== */
+/**
+ * Report generation and viewing shell (X-Report, Z-Report, sales analytics).
+ * @returns {JSX.Element} Reports management tab.
+ */
 function ReportsTab() {
   const { t, translateBatch, lang } = useTranslation();
   const [start, setStart] = useState(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); });
@@ -362,6 +378,13 @@ function ReportsTab() {
   );
 }
 
+/**
+ * Render typed report data as formatted tables.
+ * @param {Object} report - Report object with type and data.
+ * @param {string} report.type - Report type (x-report, z-report, sales-summary, etc.).
+ * @param {Object} report.data - Report data from API.
+ * @returns {JSX.Element} Formatted report view.
+ */
 function ReportView({ report }) {
   const { t } = useTranslation();
   const { type, data } = report;

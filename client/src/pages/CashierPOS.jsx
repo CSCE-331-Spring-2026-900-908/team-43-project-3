@@ -43,6 +43,11 @@ export default function CashierPOS() {
     return true;
   });
 
+  /**
+   * Add item to order, or show modifier dialog if item has modifiers.
+   * @async
+   * @param {Object} item - Menu item to add.
+   */
   const quickAdd = async (item) => {
     try {
       const mods = await api.getModifiers(item.menu_item_id);
@@ -61,6 +66,9 @@ export default function CashierPOS() {
     });
   };
 
+  /**
+   * Add customized item with selected modifiers to order.
+   */
   const addCustomized = () => {
     const selectedChoiceIds = Object.values(choices).flat().filter(Boolean).map(Number);
     let adj = 0;
@@ -76,7 +84,16 @@ export default function CashierPOS() {
     setCustomizing(null);
   };
 
+  /**
+   * Remove item from order at index.
+   * @param {number} idx - Order line index.
+   */
   const removeItem = (idx) => setOrder((o) => o.filter((_, i) => i !== idx));
+  /**
+   * Adjust quantity of order line item by delta. Remove if quantity becomes 0.
+   * @param {number} idx - Order line index.
+   * @param {number} delta - Quantity change (+1 or -1).
+   */
   const adjustQty = (idx, delta) => {
     setOrder((prev) => prev.map((o, i) => {
       if (i !== idx) return o;
@@ -87,6 +104,10 @@ export default function CashierPOS() {
 
   const total = order.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
 
+  /**
+   * Submit order and clear cart on success.
+   * @async
+   */
   const submitOrder = async () => {
     if (order.length === 0) return;
     try {

@@ -52,6 +52,11 @@ export default function CustomerKiosk() {
     translateBatch(strs);
   }, [lang, menu, categories, translateBatch]);
 
+  /**
+   * Open modifier selection dialog for item.
+   * @async
+   * @param {Object} item - Menu item to customize.
+   */
   const openCustomize = async (item) => {
     try {
       const mods = await api.getModifiers(item.menu_item_id);
@@ -67,6 +72,9 @@ export default function CustomerKiosk() {
     setCustomizing(item);
   };
 
+  /**
+   * Add customized item with selected modifiers to cart.
+   */
   const addToCart = () => {
     const selectedChoiceIds = Object.values(choices).flat().filter(Boolean).map(Number);
     let adj = 0;
@@ -94,7 +102,16 @@ export default function CustomerKiosk() {
     setCustomizing(null);
   };
 
+  /**
+   * Remove cart line item at index.
+   * @param {number} idx - Cart line index.
+   */
   const removeFromCart = (idx) => setCart((c) => c.filter((_, i) => i !== idx));
+  /**
+   * Adjust cart line quantity by delta. Remove if quantity becomes 0.
+   * @param {number} idx - Cart line index.
+   * @param {number} delta - Quantity change (+1 or -1).
+   */
   const updateCartQty = (idx, delta) => {
     setCart((prev) => prev.map((item, i) => {
       if (i !== idx) return item;
@@ -104,6 +121,10 @@ export default function CustomerKiosk() {
   };
   const cartTotal = cart.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
 
+  /**
+   * Submit cart as order and show confirmation screen.
+   * @async
+   */
   const placeOrder = async () => {
     try {
       const result = await api.submitOrder({
