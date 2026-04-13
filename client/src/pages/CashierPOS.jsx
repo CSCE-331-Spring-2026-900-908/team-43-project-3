@@ -9,14 +9,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { useTranslation } from "../contexts/TranslationContext";
 
-/**
- * Render the cashier ordering interface.
- *
- * @returns {JSX.Element}
- */
 export default function CashierPOS() {
   const navigate = useNavigate();
+  const { t, translateBatch, lang } = useTranslation();
   const [menu, setMenu] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCat, setActiveCat] = useState("All");
@@ -33,6 +30,12 @@ export default function CashierPOS() {
       setCategories(["All", ...new Set(items.map((i) => i.category))]);
     });
   }, []);
+
+  useEffect(() => {
+    const strs = ["Cashier POS", "← Back", "Search items...", "Current Order", "Tap items to add", "Total", "Clear", "Submit Order", "Cancel", "Add", "Qty:"];
+    strs.push(...menu.map((m) => m.name), ...categories);
+    translateBatch(strs);
+  }, [lang, menu, categories, translateBatch]);
 
   const filtered = menu.filter((i) => {
     if (activeCat !== "All" && i.category !== activeCat) return false;
@@ -99,37 +102,35 @@ export default function CashierPOS() {
 
   return (
     <div style={s.page}>
-      {/* Left: menu items */}
       <div style={s.left}>
         <div style={s.topBar}>
-          <button onClick={() => navigate("/")} style={s.backBtn}>← Back</button>
-          <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--primary)" }}>Cashier POS</h2>
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search items..." style={s.searchInput} />
+          <button onClick={() => navigate("/")} style={s.backBtn}>{t("← Back")}</button>
+          <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--primary)" }}>{t("Cashier POS")}</h2>
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("Search items...")} style={s.searchInput} />
         </div>
         <div style={s.catRow}>
           {categories.map((c) => (
-            <button key={c} onClick={() => setActiveCat(c)} style={{ ...s.catPill, ...(c === activeCat ? s.catPillActive : {}) }}>{c}</button>
+            <button key={c} onClick={() => setActiveCat(c)} style={{ ...s.catPill, ...(c === activeCat ? s.catPillActive : {}) }}>{t(c)}</button>
           ))}
         </div>
         <div style={s.itemGrid}>
           {filtered.map((item) => (
             <button key={item.menu_item_id} style={s.itemBtn} onClick={() => quickAdd(item)}>
-              <span style={{ fontWeight: 600, fontSize: "0.85rem" }}>{item.name}</span>
+              <span style={{ fontWeight: 600, fontSize: "0.85rem" }}>{t(item.name)}</span>
               <span style={{ color: "var(--primary)", fontWeight: 700, fontSize: "0.8rem" }}>${parseFloat(item.base_price).toFixed(2)}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Right: current order */}
       <div style={s.right}>
-        <h3 style={{ marginBottom: "0.5rem" }}>Current Order</h3>
+        <h3 style={{ marginBottom: "0.5rem" }}>{t("Current Order")}</h3>
         <div style={{ flex: 1, overflowY: "auto" }}>
-          {order.length === 0 && <p style={{ color: "#999", fontSize: "0.85rem" }}>Tap items to add</p>}
+          {order.length === 0 && <p style={{ color: "#999", fontSize: "0.85rem" }}>{t("Tap items to add")}</p>}
           {order.map((o, i) => (
             <div key={i} style={s.orderRow}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{o.name}</div>
+                <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{t(o.name)}</div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
                 <button onClick={() => adjustQty(i, -1)} style={s.qtySmBtn}>−</button>
@@ -143,30 +144,29 @@ export default function CashierPOS() {
         </div>
         <div style={{ borderTop: "2px solid #333", paddingTop: "0.75rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.3rem", fontWeight: 700 }}>
-            <span>Total</span><span>${total.toFixed(2)}</span>
+            <span>{t("Total")}</span><span>${total.toFixed(2)}</span>
           </div>
           <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-            <button className="btn-danger" onClick={() => setOrder([])} style={{ flex: 1 }} disabled={order.length === 0}>Clear</button>
-            <button className="btn-primary" onClick={submitOrder} style={{ flex: 2, fontSize: "1.05rem" }} disabled={order.length === 0}>Submit Order</button>
+            <button className="btn-danger" onClick={() => setOrder([])} style={{ flex: 1 }} disabled={order.length === 0}>{t("Clear")}</button>
+            <button className="btn-primary" onClick={submitOrder} style={{ flex: 2, fontSize: "1.05rem" }} disabled={order.length === 0}>{t("Submit Order")}</button>
           </div>
         </div>
       </div>
 
-      {/* Customization modal */}
       {customizing && (
         <div style={s.overlay} onClick={() => setCustomizing(null)}>
           <div style={s.modal} onClick={(e) => e.stopPropagation()}>
-            <h3>{customizing.name}</h3>
+            <h3>{t(customizing.name)}</h3>
             {modifiers.map((mod) => (
               <div key={mod.modifier_id} style={{ marginTop: "0.75rem" }}>
-                <strong style={{ fontSize: "0.85rem" }}>{mod.name}</strong>
+                <strong style={{ fontSize: "0.85rem" }}>{t(mod.name)}</strong>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.3rem" }}>
                   {mod.choices.map((c) => {
                     const sel = choices[mod.modifier_id] === c.choice_id;
                     return (
                       <button key={c.choice_id} onClick={() => setChoices((p) => ({ ...p, [mod.modifier_id]: sel ? null : c.choice_id }))}
                         style={{ padding: "0.35rem 0.8rem", borderRadius: 16, border: sel ? "2px solid var(--primary)" : "1px solid var(--border)", background: sel ? "var(--primary)" : "var(--bg)", color: sel ? "#fff" : "var(--text)", fontSize: "0.8rem", fontWeight: 500 }}>
-                        {c.label}{c.price_delta > 0 && ` +$${c.price_delta.toFixed(2)}`}
+                        {t(c.label)}{c.price_delta > 0 && ` +$${c.price_delta.toFixed(2)}`}
                       </button>
                     );
                   })}
@@ -174,14 +174,14 @@ export default function CashierPOS() {
               </div>
             ))}
             <div style={{ marginTop: "0.75rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              <strong>Qty:</strong>
+              <strong>{t("Qty:")}</strong>
               <button onClick={() => setQty(Math.max(1, qty - 1))} style={s.qtySmBtn}>−</button>
               <span style={{ fontWeight: 700 }}>{qty}</span>
               <button onClick={() => setQty(qty + 1)} style={s.qtySmBtn}>+</button>
             </div>
             <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-              <button className="btn-outline" onClick={() => setCustomizing(null)} style={{ flex: 1 }}>Cancel</button>
-              <button className="btn-primary" onClick={addCustomized} style={{ flex: 1 }}>Add</button>
+              <button className="btn-outline" onClick={() => setCustomizing(null)} style={{ flex: 1 }}>{t("Cancel")}</button>
+              <button className="btn-primary" onClick={addCustomized} style={{ flex: 1 }}>{t("Add")}</button>
             </div>
           </div>
         </div>
