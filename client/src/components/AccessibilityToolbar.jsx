@@ -201,3 +201,39 @@ export default function AccessibilityToolbar() {
     </>
   );
 }
+
+const st = {
+  fab: {
+    position: "fixed", bottom: 24, left: 24, width: 52, height: 52, borderRadius: "50%",
+    background: "#8b5e3c", color: "#fff", fontSize: 22,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    boxShadow: "0 4px 16px rgba(0,0,0,0.25)", border: "none", zIndex: 99999, cursor: "pointer",
+  },
+  panel: {
+    position: "fixed", bottom: 24, left: 24, width: 280, borderRadius: 16,
+    background: "#fff", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", color: "#333",
+    zIndex: 99999, overflow: "hidden", fontFamily: "Inter, system-ui, sans-serif",
+  },
+  panelHeader: {
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    padding: "12px 16px", background: "#8b5e3c", color: "#fff",
+  },
+  closeBtn: { background: "none", border: "none", color: "#fff", fontSize: 18, cursor: "pointer" },
+  section: { padding: "10px 16px", borderBottom: "1px solid #eee" },
+  label: { fontSize: 13, fontWeight: 600, marginBottom: 6, color: "#555" },
+  select: { width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #ddd", fontSize: 14, color: "#333", background: "#fff" },
+  toggleBtn: {
+    width: "100%", padding: 8, borderRadius: 8, border: "none",
+    fontWeight: 600, fontSize: 14, cursor: "pointer",
+  },
+  sizeBtn: {
+    padding: "6px 4px", borderRadius: 6, border: "none",
+    fontSize: 12, cursor: "pointer", textAlign: "center",
+  },
+  zoomBanner: {
+    position: "fixed", top: 0, left: 0, right: 0, zIndex: 99999,
+    background: "#8b5e3c", color: "#fff", textAlign: "center",
+    padding: "10px 16px", fontSize: 15, fontWeight: 600,
+    fontFamily: "Inter, system-ui, sans-serif",
+  },
+};
