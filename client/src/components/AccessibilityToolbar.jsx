@@ -163,3 +163,41 @@ export default function AccessibilityToolbar() {
               {magLabel}
             </button>
           </div>
+
+          {/* High Contrast */}
+          <div style={st.section}>
+            <div style={st.label}>◑ High Contrast</div>
+            <button
+              onClick={() => setHighContrast((h) => !h)}
+              style={{ ...st.toggleBtn, background: highContrast ? "#d4a574" : "#e8e0d6", color: highContrast ? "#fff" : "#333" }}
+            >
+              {highContrast ? "ON" : "OFF"}
+            </button>
+          </div>
+
+          {/* Text Size */}
+          <div style={st.section}>
+            <div style={st.label}>🔤 Text Size</div>
+            <div style={{ display: "flex", gap: 6 }}>
+              {TEXT_SIZES.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => setTextLevel(i)}
+                  style={{
+                    ...st.sizeBtn,
+                    flex: 1,
+                    background: textLevel === i ? "#d4a574" : "#f0ebe4",
+                    color: textLevel === i ? "#fff" : "#333",
+                    fontWeight: textLevel === i ? 700 : 500,
+                  }}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
