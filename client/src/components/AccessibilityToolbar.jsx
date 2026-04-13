@@ -134,3 +134,32 @@ export default function AccessibilityToolbar() {
           ♿
         </button>
       )}
+
+      {/* Expanded panel */}
+      {open && (
+        <div className="accessibility-toolbar" style={st.panel}>
+          <div style={st.panelHeader}>
+            <span style={{ fontWeight: 700, fontSize: 15 }}>Accessibility</span>
+            <button onClick={() => setOpen(false)} style={st.closeBtn}>✕</button>
+          </div>
+
+          {/* Language */}
+          <div style={st.section}>
+            <div style={st.label}>🌐 Language</div>
+            <select value={lang} onChange={(e) => setLang(e.target.value)} style={st.select}>
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Magnifier */}
+          <div style={st.section}>
+            <div style={st.label}>🔍 Magnifier</div>
+            <button
+              onClick={toggleMagnifier}
+              style={{ ...st.toggleBtn, background: magActive ? "#d4a574" : "#e8e0d6", color: magActive ? "#fff" : "#333" }}
+            >
+              {magLabel}
+            </button>
+          </div>
