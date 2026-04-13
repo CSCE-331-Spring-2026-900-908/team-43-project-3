@@ -27,3 +27,37 @@ export default function AccessibilityToolbar() {
   useEffect(() => {
     document.body.classList.toggle("high-contrast", highContrast);
   }, [highContrast]);
+
+  // --- Picking mode: cursor = zoom-in, click zooms into that spot ---
+  useEffect(() => {
+    if (magState !== "picking") return;
+    document.body.style.cursor = "zoom-in";
+
+    let handler;
+    const timer = setTimeout(() => {
+      handler = (e) => {
+        if (e.target.closest(".accessibility-toolbar")) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        const content = document.getElementById("app-content");
+        if (!content) return;
+
+        const rect = content.getBoundingClientRect();
+        const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+        const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+
+        content.style.transformOrigin = `${xPct}% ${yPct}%`;
+        content.style.transform = "scale(2)";
+        document.body.style.cursor = "zoom-out";
+        setMagState("zoomed");
+      };
+      document.addEventListener("click", handler, true);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.body.style.cursor = "";
+      if (handler) document.removeEventListener("click", handler, true);
+    };
+  }, [magState]);
