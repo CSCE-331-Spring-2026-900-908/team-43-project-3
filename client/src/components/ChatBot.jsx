@@ -17,6 +17,12 @@ export default function ChatBot() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Send user message to chat API and append response.
+   * Prevents sending while loading or with empty input.
+   * @async
+   * @returns {Promise<void>}
+   */
   const send = async () => {
     if (!input.trim() || loading) return;
     const userMsg = input.trim();

@@ -1,3 +1,8 @@
+/**
+ * Accessibility toolbar for language, contrast, text size, and magnifier mode.
+ *
+ * This component manages accessibility settings globally for the client UI.
+ */
 import { useState, useEffect } from "react";
 import { useTranslation, LANGUAGES } from "../contexts/TranslationContext";
 
@@ -10,6 +15,10 @@ const TEXT_SIZES = [
 // magnifier states: "off" | "picking" | "zoomed"
 // picking ↔ zoomed loop; only toolbar button exits to "off"
 
+/**
+ * Accessibility toolbar component for language, contrast, text size, and magnifier.
+ * @returns {JSX.Element} Accessibility toolbar with FAB and expandable panel.
+ */
 export default function AccessibilityToolbar() {
   const { lang, setLang } = useTranslation();
   const [open, setOpen] = useState(false);
