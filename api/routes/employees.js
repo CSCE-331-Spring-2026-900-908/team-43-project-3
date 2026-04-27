@@ -8,6 +8,7 @@
  */
 import { Router } from "express";
 import pool from "../db.js";
+import { requireAuth } from "../auth.js";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ const router = Router();
  * @param {express.Request} _req - HTTP request (unused).
  * @param {express.Response} res - HTTP response with array of employees.
  */
-router.get("/", async (_req, res) => {
+router.get("/", requireAuth(["manager"]), async (_req, res) => {
   try {
     const { rows } = await pool.query(
       "SELECT * FROM employees ORDER BY employee_id"
@@ -32,7 +33,7 @@ router.get("/", async (_req, res) => {
  * @param {express.Request} req - HTTP request with { name, role? }.
  * @param {express.Response} res - HTTP response with created employee (default role: Cashier).
  */
-router.post("/", async (req, res) => {
+router.post("/", requireAuth(["manager"]), async (req, res) => {
   const { name, role } = req.body;
   try {
     const { rows } = await pool.query(
@@ -50,7 +51,7 @@ router.post("/", async (req, res) => {
  * @param {express.Request} req - HTTP request with { name?, role?, is_active? }.
  * @param {express.Response} res - HTTP response with updated employee.
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAuth(["manager"]), async (req, res) => {
   const { name, role, is_active } = req.body;
   try {
     const { rows } = await pool.query(
