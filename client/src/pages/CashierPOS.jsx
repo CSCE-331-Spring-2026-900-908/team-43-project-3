@@ -7,13 +7,13 @@
  * @returns {JSX.Element}
  */
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function CashierPOS() {
-  const navigate = useNavigate();
   const { t, translateBatch, lang } = useTranslation();
+  const { user, logout } = useAuth();
   const [menu, setMenu] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCat, setActiveCat] = useState("All");
@@ -32,7 +32,7 @@ export default function CashierPOS() {
   }, []);
 
   useEffect(() => {
-    const strs = ["Cashier POS", "← Back", "Search items...", "Current Order", "Tap items to add", "Total", "Clear", "Submit Order", "Cancel", "Add", "Qty:"];
+    const strs = ["Cashier POS", "Search items...", "Current Order", "Tap items to add", "Total", "Clear", "Submit Order", "Cancel", "Add", "Qty:", "Sign Out"];
     strs.push(...menu.map((m) => m.name), ...categories);
     translateBatch(strs);
   }, [lang, menu, categories, translateBatch]);
@@ -125,9 +125,15 @@ export default function CashierPOS() {
     <div style={s.page}>
       <div style={s.left}>
         <div style={s.topBar}>
-          <button onClick={() => navigate("/")} style={s.backBtn}>{t("← Back")}</button>
           <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--primary)" }}>{t("Cashier POS")}</h2>
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("Search items...")} style={s.searchInput} />
+          <div style={s.userBadge}>
+            <div>
+              <div style={s.userName}>{user?.name || user?.email}</div>
+              <div style={s.userRole}>{user?.role}</div>
+            </div>
+            <button className="btn-outline" onClick={logout}>{t("Sign Out")}</button>
+          </div>
         </div>
         <div style={s.catRow}>
           {categories.map((c) => (
@@ -215,8 +221,10 @@ const s = {
   page: { height: "100vh", display: "flex", background: "#1a1a2e", color: "#e0e0e0", overflow: "hidden" },
   left: { flex: 1, display: "flex", flexDirection: "column", borderRight: "1px solid #333" },
   topBar: { display: "flex", alignItems: "center", gap: "1rem", padding: "0.75rem 1rem", background: "#16213e", borderBottom: "1px solid #333" },
-  backBtn: { background: "rgba(255,255,255,0.1)", border: "none", color: "#ccc", padding: "0.4rem 0.8rem", borderRadius: 8, fontWeight: 600, fontSize: "0.85rem" },
   searchInput: { flex: 1, background: "#0f3460", border: "1px solid #444", color: "#fff", borderRadius: 8, padding: "0.4rem 0.75rem" },
+  userBadge: { display: "flex", alignItems: "center", gap: "0.75rem", color: "#f5e7d0" },
+  userName: { fontWeight: 700, fontSize: "0.85rem" },
+  userRole: { fontSize: "0.72rem", textTransform: "capitalize", color: "#c8b28f" },
   catRow: { display: "flex", gap: "0.4rem", padding: "0.5rem 1rem", overflowX: "auto", background: "#16213e" },
   catPill: { padding: "0.35rem 0.9rem", borderRadius: 20, border: "1px solid #444", background: "transparent", color: "#ccc", fontSize: "0.8rem", whiteSpace: "nowrap", fontWeight: 500 },
   catPillActive: { background: "var(--primary)", color: "#fff", borderColor: "var(--primary)" },
