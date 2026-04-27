@@ -80,7 +80,10 @@ export function TranslationProvider({ children }) {
   );
 }
 
-/**\n * Hook to access the translation context.\n * @returns {{ lang: string, setLang, t, translateBatch, languages }} Translation context value.\n */
+/**
+ * Hook to access the translation context.
+ * @returns {{ lang: string, setLang, t, translateBatch, languages }} Translation context value.
+ */
 export function useTranslation() { 
     return useContext(TranslationContext);
 }
