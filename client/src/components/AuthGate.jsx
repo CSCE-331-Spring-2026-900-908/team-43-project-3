@@ -114,3 +114,44 @@ function LoginCard({ allowedRoles, title }) {
     </div>
   );
 }
+
+function AccessDenied({ user, allowedRoles, onLogout }) {
+  return (
+    <div style={styles.page}>
+      <div style={styles.card}>
+        <p style={styles.eyebrow}>Access restricted</p>
+        <h1 style={styles.heading}>This account can’t open this page</h1>
+        <p style={styles.subtext}>
+          Signed in as {user.name || user.email} with {roleLabel(user.role)} access. This page requires {allowedRoles.map(roleLabel).join(" or ")} access.
+        </p>
+        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
+          <button className="btn-primary" onClick={onLogout}>Switch account</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function AuthGate({ allowedRoles, title, children }) {
+  const { user, loading, isAuthenticated, hasRole, logout } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.card}>
+          <h1 style={styles.heading}>Checking your access…</h1>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginCard allowedRoles={allowedRoles} title={title} />;
+  }
+
+  if (!hasRole(allowedRoles)) {
+    return <AccessDenied user={user} allowedRoles={allowedRoles} onLogout={logout} />;
+  }
+
+  return children;
+}
