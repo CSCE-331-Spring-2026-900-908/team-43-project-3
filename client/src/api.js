@@ -5,6 +5,19 @@
  * error handling so components can work with plain data objects.
  */
 const BASE = "/api";
+const TOKEN_KEY = "pos_auth_token";
+
+export function getAuthToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setAuthToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearAuthToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
 
 /**
  * Perform a JSON API request and return the parsed response body.
@@ -14,8 +27,13 @@ const BASE = "/api";
  * @returns {Promise<any>} Parsed JSON payload from the server.
  */
 async function request(path, opts = {}) {
+  const token = getAuthToken();
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...opts.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...opts.headers,
+    },
     ...opts,
   });
   const data = await res.json();
@@ -24,6 +42,10 @@ async function request(path, opts = {}) {
 }
 
 export const api = {
+  getAuthConfig:   ()           => request("/auth/config"),
+  googleLogin:     (credential) => request("/auth/google", { method: "POST", body: JSON.stringify({ credential }) }),
+  getCurrentUser:  ()           => request("/auth/me"),
+
   // --- Menu Management ---
   /**
    * Fetch all menu items.
