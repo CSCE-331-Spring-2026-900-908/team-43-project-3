@@ -155,3 +155,62 @@ export default function AuthGate({ allowedRoles, title, children }) {
 
   return children;
 }
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "2rem",
+    background: "radial-gradient(circle at top, #f7efe2 0%, #efe5d2 45%, #e4d5bd 100%)",
+  },
+  card: {
+    width: "100%",
+    maxWidth: 520,
+    background: "rgba(255,255,255,0.92)",
+    borderRadius: 28,
+    padding: "2.5rem",
+    boxShadow: "0 24px 70px rgba(86, 56, 23, 0.18)",
+    border: "1px solid rgba(120, 85, 40, 0.12)",
+    textAlign: "center",
+  },
+  eyebrow: {
+    margin: 0,
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    fontSize: "0.8rem",
+    color: "#9a6a37",
+    fontWeight: 700,
+  },
+  heading: {
+    margin: "0.75rem 0 0.5rem",
+    fontSize: "2rem",
+    color: "#3f2a12",
+  },
+  subtext: {
+    margin: 0,
+    color: "#6f5840",
+    lineHeight: 1.5,
+  },
+  domainHint: {
+    margin: "0.9rem 0 0",
+    color: "#8f6f46",
+    fontWeight: 600,
+  },
+  buttonSlot: {
+    minHeight: 48,
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "1.5rem",
+  },
+  helper: {
+    marginTop: "0.8rem",
+    color: "#6f5840",
+  },
+  error: {
+    marginTop: "1rem",
+    color: "#b42318",
+    fontWeight: 600,
+  },
+};
