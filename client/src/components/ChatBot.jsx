@@ -50,7 +50,7 @@ export default function ChatBot() {
   return (
     <div style={styles.panel}>
       <div style={styles.header}>
-        <span style={{ fontWeight: 600 }}>Tea Assistant</span>
+        <span style={{ fontWeight: 600 }}>Iroh's Tea Assistant</span>
         <button onClick={() => setOpen(false)} style={styles.close}>✕</button>
       </div>
       <div style={styles.messages}>
