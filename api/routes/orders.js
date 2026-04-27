@@ -8,6 +8,7 @@
  */
 import { Router } from "express";
 import pool from "../db.js";
+import { requireAuth } from "../auth.js";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ const router = Router();
  * @param {express.Request} req - HTTP request with query { start?, end?, limit? } (date strings).
  * @param {express.Response} res - HTTP response with array of orders.
  */
-router.get("/", async (req, res) => {
+router.get("/", requireAuth(["manager"]), async (req, res) => {
   const { start, end, limit } = req.query;
   try {
     let sql = "SELECT * FROM orders WHERE 1=1";
