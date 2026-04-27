@@ -22,7 +22,7 @@ export default function Portal() {
   return (
     <div style={styles.page}>
       <div style={styles.hero}>
-        <h1 style={styles.title}>ShareTea POS</h1>
+        <h1 style={styles.title}>Iroh's Tea POS</h1>
         <p style={styles.subtitle}>Team 43 — Select an interface</p>
         <WeatherWidget />
       </div>
