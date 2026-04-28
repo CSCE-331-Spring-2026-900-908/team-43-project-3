@@ -10,6 +10,7 @@ import { useState, useEffect, useRef } from "react";
 import { api } from "../api";
 import { useTranslation } from "../contexts/TranslationContext";
 import ChatBot from "../components/ChatBot";
+import DrinkImage from "../components/DrinkImage";
 
 /* ---- Colorful Filled Category Icons ---- */
 function CategoryIcon({ category, size = 30 }) {
@@ -96,6 +97,34 @@ const SEASONS = [
   { id: "fall", label: "Fall", categories: ["Coffee", "Brewed Tea"], max: 4 },
   { id: "winter", label: "Winter", categories: ["Milk Tea"], max: 4 },
 ];
+
+const MOST_SOLD_DRINKS = [
+  "Honey Milk Tea",
+  "Thai Milk Tea",
+  "Taro Milk Tea",
+  "Okinawa Milk Tea",
+  "Mango Blend",
+  "Strawberry Fruit Tea",
+];
+
+function isMultiSelectModifier(modifierName) {
+  const normalized = modifierName.toLowerCase();
+  return normalized.includes("topping") || normalized.includes("add-on") || normalized.includes("addon");
+}
+
+function toggleModifierChoice(prevChoices, mod, choiceId) {
+  if (isMultiSelectModifier(mod.name)) {
+    const current = Array.isArray(prevChoices[mod.modifier_id]) ? prevChoices[mod.modifier_id] : [];
+    const next = current.includes(choiceId)
+      ? current.filter((id) => id !== choiceId)
+      : [...current, choiceId];
+
+    return { ...prevChoices, [mod.modifier_id]: next };
+  }
+
+  const current = prevChoices[mod.modifier_id];
+  return { ...prevChoices, [mod.modifier_id]: current === choiceId ? null : choiceId };
+}
 
 /* ---- Slot Machine Prize Component ---- */
 const SLOT_SYMBOLS = ["🍵", "☕", "🧋", "⭐", "💎", "💰"];
@@ -257,6 +286,7 @@ export default function CustomerKiosk() {
   const [showWheel, setShowWheel] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [showSeasonal, setShowSeasonal] = useState(false);
+  const [showMostSold, setShowMostSold] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState("spring");
 
   useEffect(() => {
@@ -274,8 +304,8 @@ export default function CustomerKiosk() {
       "Tap an item to get started", "New Order", "Order Placed!",
       "Add to Order", "Cancel", "Qty:", "Continue Shopping", "Confirm & Place Order",
       "Review Your Order", "Remove", "Order Summary",
-      "Drink of the Season", "Spring", "Summer", "Fall", "Winter",
-      "Seasonal Picks", "Placing your order...",
+      "Drink of the Season", "Spring", "Summer", "Fall", "Winter", "Most Popular",
+      "Seasonal Picks", "Placing your order...", "Select multiple toppings if you'd like",
       ...menu.map((m) => m.name),
       ...categories,
     ];
@@ -481,7 +511,12 @@ export default function CustomerKiosk() {
   const seasonalDrinks = currentSeason
     ? menu.filter((item) => currentSeason.categories.includes(item.category)).slice(0, currentSeason.max)
     : [];
-  const filtered = showSeasonal ? seasonalDrinks : menu.filter((i) => i.category === activeCat);
+  const mostSoldDrinks = menu.filter((item) => MOST_SOLD_DRINKS.includes(item.name));
+  const filtered = showSeasonal
+    ? seasonalDrinks
+    : showMostSold
+      ? mostSoldDrinks
+      : menu.filter((i) => i.category === activeCat);
 
   return (
     <div style={st.page}>
@@ -496,16 +531,24 @@ export default function CustomerKiosk() {
         {/* Category sidebar */}
         <nav style={st.sidebar}>
           <button
-            onClick={() => { setShowSeasonal(true); setActiveCat(null); }}
+            onClick={() => { setShowSeasonal(true); setShowMostSold(false); setActiveCat(null); }}
             style={{ ...st.catBtn, ...(showSeasonal ? st.catBtnActive : {}), borderBottom: "2px solid var(--border)", paddingBottom: "0.75rem", marginBottom: "0.25rem" }}
           >
             <CategoryIcon category="Seasonal" size={24} />
             <span style={{ fontSize: "0.72rem", lineHeight: 1.2 }}>{t("Drink of the Season")}</span>
           </button>
 
+          <button
+            onClick={() => { setShowMostSold(true); setShowSeasonal(false); setActiveCat(null); }}
+            style={{ ...st.catBtn, ...(showMostSold ? st.catBtnActive : {}) }}
+          >
+            <span style={{ fontSize: "1.35rem", lineHeight: 1 }}>⭐</span>
+            <span>{t("Most Popular")}</span>
+          </button>
+
           {categories.map((cat) => (
-            <button key={cat} onClick={() => { setActiveCat(cat); setShowSeasonal(false); }}
-              style={{ ...st.catBtn, ...(cat === activeCat && !showSeasonal ? st.catBtnActive : {}) }}>
+            <button key={cat} onClick={() => { setActiveCat(cat); setShowSeasonal(false); setShowMostSold(false); }}
+              style={{ ...st.catBtn, ...(cat === activeCat && !showSeasonal && !showMostSold ? st.catBtnActive : {}) }}>
               <CategoryIcon category={cat} size={24} />
               <span>{t(cat)}</span>
             </button>
@@ -514,41 +557,50 @@ export default function CustomerKiosk() {
 
         {/* Menu grid */}
         <main style={st.menuArea}>
-          {showSeasonal && (
+          {(showSeasonal || showMostSold) && (
             <div style={st.seasonBar}>
-              <h2 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.75rem" }}>{t("Drink of the Season")}</h2>
-              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                {SEASONS.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setSelectedSeason(s.id)}
-                    style={{
-                      padding: "0.5rem 1.2rem",
-                      borderRadius: 20,
-                      fontWeight: 600,
-                      fontSize: "0.9rem",
-                      border: selectedSeason === s.id ? "2px solid var(--primary)" : "2px solid var(--border)",
-                      background: selectedSeason === s.id ? "var(--primary)" : "var(--bg)",
-                      color: selectedSeason === s.id ? "#fff" : "var(--text)",
-                    }}
-                  >
-                    {t(s.label)}
-                  </button>
-                ))}
-              </div>
+              <h2 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.75rem" }}>
+                {showSeasonal ? t("Drink of the Season") : t("Most Popular")}
+              </h2>
+              {showSeasonal && (
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                  {SEASONS.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => setSelectedSeason(s.id)}
+                      style={{
+                        padding: "0.5rem 1.2rem",
+                        borderRadius: 20,
+                        fontWeight: 600,
+                        fontSize: "0.9rem",
+                        border: selectedSeason === s.id ? "2px solid var(--primary)" : "2px solid var(--border)",
+                        background: selectedSeason === s.id ? "var(--primary)" : "var(--bg)",
+                        color: selectedSeason === s.id ? "#fff" : "var(--text)",
+                      }}
+                    >
+                      {t(s.label)}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           <div style={st.menuGrid}>
             {filtered.map((item) => (
               <button key={item.menu_item_id} style={st.menuCard} onClick={() => openCustomize(item)}>
+                <DrinkImage
+                  name={item.name}
+                  category={item.category}
+                  style={st.menuCardImage}
+                />
                 <div style={st.menuCardName}>{t(item.name)}</div>
                 <div style={st.menuCardPrice}>${parseFloat(item.base_price).toFixed(2)}</div>
               </button>
             ))}
             {filtered.length === 0 && (
               <p style={{ color: "var(--text-light)", gridColumn: "1 / -1", textAlign: "center", padding: "2rem" }}>
-                {t("Seasonal Picks")}
+                {showSeasonal ? t("Seasonal Picks") : t("Most Popular")}
               </p>
             )}
           </div>
@@ -595,12 +647,20 @@ export default function CustomerKiosk() {
             {modifiers.map((mod) => (
               <div key={mod.modifier_id} style={{ marginTop: "1rem" }}>
                 <h3 style={{ fontSize: "0.95rem", marginBottom: "0.5rem" }}>{t(mod.name)}</h3>
+                {isMultiSelectModifier(mod.name) && (
+                  <p style={{ fontSize: "0.82rem", color: "var(--text-light)", marginBottom: "0.5rem" }}>
+                    {t("Select multiple toppings if you'd like")}
+                  </p>
+                )}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                   {mod.choices.map((c) => {
-                    const sel = choices[mod.modifier_id] === c.choice_id;
+                    const selectedChoices = Array.isArray(choices[mod.modifier_id]) ? choices[mod.modifier_id] : [];
+                    const sel = isMultiSelectModifier(mod.name)
+                      ? selectedChoices.includes(c.choice_id)
+                      : choices[mod.modifier_id] === c.choice_id;
                     return (
                       <button key={c.choice_id}
-                        onClick={() => setChoices((prev) => ({ ...prev, [mod.modifier_id]: sel ? null : c.choice_id }))}
+                        onClick={() => setChoices((prev) => toggleModifierChoice(prev, mod, c.choice_id))}
                         style={{ ...st.choiceBtn, ...(sel ? st.choiceBtnSel : {}) }}>
                         {t(c.label)}
                         {c.price_delta > 0 && ` (+$${c.price_delta.toFixed(2)})`}
@@ -646,6 +706,7 @@ const st = {
   seasonBar: { padding: "1rem", background: "var(--card)", borderBottom: "1px solid var(--border)" },
   menuGrid: { flex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "1rem", padding: "1rem", overflowY: "auto", alignContent: "start" },
   menuCard: { background: "var(--card)", borderRadius: "var(--radius)", boxShadow: "var(--shadow)", padding: "1.25rem 1rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem", border: "2px solid transparent", textAlign: "center" },
+  menuCardImage: { width: "100%", maxWidth: 132, aspectRatio: "1 / 1", objectFit: "cover", borderRadius: 16, marginBottom: "0.35rem", boxShadow: "0 8px 24px rgba(45, 32, 19, 0.12)" },
   menuCardName: { fontWeight: 600, fontSize: "0.95rem" },
   menuCardPrice: { color: "var(--primary-dark)", fontWeight: 700 },
   cartPanel: { width: 300, background: "var(--card)", borderLeft: "1px solid var(--border)", display: "flex", flexDirection: "column", padding: "1rem" },
