@@ -10,6 +10,26 @@ import { useState, useEffect } from "react";
 import { api } from "../api";
 import { useTranslation } from "../contexts/TranslationContext";
 import { useAuth } from "../contexts/AuthContext";
+import DrinkImage from "../components/DrinkImage";
+
+function isMultiSelectModifier(modifierName) {
+  const normalized = modifierName.toLowerCase();
+  return normalized.includes("topping") || normalized.includes("add-on") || normalized.includes("addon");
+}
+
+function toggleModifierChoice(prevChoices, mod, choiceId) {
+  if (isMultiSelectModifier(mod.name)) {
+    const current = Array.isArray(prevChoices[mod.modifier_id]) ? prevChoices[mod.modifier_id] : [];
+    const next = current.includes(choiceId)
+      ? current.filter((id) => id !== choiceId)
+      : [...current, choiceId];
+
+    return { ...prevChoices, [mod.modifier_id]: next };
+  }
+
+  const current = prevChoices[mod.modifier_id];
+  return { ...prevChoices, [mod.modifier_id]: current === choiceId ? null : choiceId };
+}
 
 export default function CashierPOS() {
   const { t, translateBatch, lang } = useTranslation();
@@ -32,7 +52,7 @@ export default function CashierPOS() {
   }, []);
 
   useEffect(() => {
-    const strs = ["Cashier POS", "Search items...", "Current Order", "Tap items to add", "Total", "Clear", "Submit Order", "Cancel", "Add", "Qty:", "Sign Out"];
+    const strs = ["Cashier POS", "Search items...", "Current Order", "Tap items to add", "Total", "Clear", "Submit Order", "Cancel", "Add", "Qty:", "Sign Out", "Select multiple toppings if you'd like"];
     strs.push(...menu.map((m) => m.name), ...categories);
     translateBatch(strs);
   }, [lang, menu, categories, translateBatch]);
@@ -143,6 +163,11 @@ export default function CashierPOS() {
         <div style={s.itemGrid}>
           {filtered.map((item) => (
             <button key={item.menu_item_id} style={s.itemBtn} onClick={() => quickAdd(item)}>
+              <DrinkImage
+                name={item.name}
+                category={item.category}
+                style={s.itemImage}
+              />
               <span style={{ fontWeight: 600, fontSize: "0.85rem" }}>{t(item.name)}</span>
               <span style={{ color: "var(--primary)", fontWeight: 700, fontSize: "0.8rem" }}>${parseFloat(item.base_price).toFixed(2)}</span>
             </button>
@@ -187,11 +212,19 @@ export default function CashierPOS() {
             {modifiers.map((mod) => (
               <div key={mod.modifier_id} style={{ marginTop: "0.75rem" }}>
                 <strong style={{ fontSize: "0.85rem" }}>{t(mod.name)}</strong>
+                {isMultiSelectModifier(mod.name) && (
+                  <div style={{ fontSize: "0.78rem", color: "var(--text-light)", marginTop: "0.3rem" }}>
+                    {t("Select multiple toppings if you'd like")}
+                  </div>
+                )}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.3rem" }}>
                   {mod.choices.map((c) => {
-                    const sel = choices[mod.modifier_id] === c.choice_id;
+                    const selectedChoices = Array.isArray(choices[mod.modifier_id]) ? choices[mod.modifier_id] : [];
+                    const sel = isMultiSelectModifier(mod.name)
+                      ? selectedChoices.includes(c.choice_id)
+                      : choices[mod.modifier_id] === c.choice_id;
                     return (
-                      <button key={c.choice_id} onClick={() => setChoices((p) => ({ ...p, [mod.modifier_id]: sel ? null : c.choice_id }))}
+                      <button key={c.choice_id} onClick={() => setChoices((p) => toggleModifierChoice(p, mod, c.choice_id))}
                         style={{ padding: "0.35rem 0.8rem", borderRadius: 16, border: sel ? "2px solid var(--primary)" : "1px solid var(--border)", background: sel ? "var(--primary)" : "var(--bg)", color: sel ? "#fff" : "var(--text)", fontSize: "0.8rem", fontWeight: 500 }}>
                         {t(c.label)}{c.price_delta > 0 && ` +$${c.price_delta.toFixed(2)}`}
                       </button>
@@ -230,6 +263,7 @@ const s = {
   catPillActive: { background: "var(--primary)", color: "#fff", borderColor: "var(--primary)" },
   itemGrid: { flex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "0.6rem", padding: "0.75rem", overflowY: "auto", alignContent: "start" },
   itemBtn: { background: "#16213e", border: "1px solid #333", borderRadius: 10, padding: "0.75rem 0.5rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem", color: "#e0e0e0", textAlign: "center" },
+  itemImage: { width: "100%", maxWidth: 92, aspectRatio: "1 / 1", objectFit: "cover", borderRadius: 12, marginBottom: "0.2rem" },
   right: { width: 320, display: "flex", flexDirection: "column", padding: "0.75rem 1rem", background: "#16213e" },
   orderRow: { display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0", borderBottom: "1px solid #333" },
   qtySmBtn: { width: 28, height: 28, borderRadius: "50%", border: "1px solid #555", background: "#0f3460", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 },
