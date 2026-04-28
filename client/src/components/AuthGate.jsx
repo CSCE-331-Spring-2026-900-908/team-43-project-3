@@ -1,7 +1,14 @@
+/**
+ * Authentication gate components for protected cashier and manager routes.
+ */
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import { useAuth } from "../contexts/AuthContext";
 
+/**
+ * Loads the Google Identity Services client script once for the login card.
+ * @returns {Promise<void>} Resolves when the Google client is ready.
+ */
 function loadGoogleScript() {
   if (window.google?.accounts?.id) {
     return Promise.resolve();
@@ -26,10 +33,20 @@ function loadGoogleScript() {
   });
 }
 
+/**
+ * Converts an internal role value into display text.
+ * @param {string} role - The internal role identifier.
+ * @returns {string} A lowercase role label.
+ */
 function roleLabel(role) {
   return role === "manager" ? "manager" : "cashier";
 }
 
+/**
+ * Shows the Google sign-in prompt for users who are not authenticated.
+ * @param {{allowedRoles: string[], title: string}} props - Login card props.
+ * @returns {import("react").ReactElement} The login card UI.
+ */
 function LoginCard({ allowedRoles, title }) {
   const { loginWithGoogle } = useAuth();
   const buttonRef = useRef(null);
@@ -37,6 +54,10 @@ function LoginCard({ allowedRoles, title }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  /**
+   * Loads public OAuth configuration from the API.
+   * @returns {void}
+   */
   useEffect(() => {
     let cancelled = false;
 
@@ -53,6 +74,10 @@ function LoginCard({ allowedRoles, title }) {
     };
   }, []);
 
+  /**
+   * Renders Google's hosted login button after configuration is available.
+   * @returns {void}
+   */
   useEffect(() => {
     if (!config?.googleClientId || !buttonRef.current) return;
 
@@ -115,6 +140,11 @@ function LoginCard({ allowedRoles, title }) {
   );
 }
 
+/**
+ * Explains that the signed-in user lacks one of the required roles.
+ * @param {{user: object, allowedRoles: string[], onLogout: Function}} props - Access denied props.
+ * @returns {import("react").ReactElement} The access denied UI.
+ */
 function AccessDenied({ user, allowedRoles, onLogout }) {
   return (
     <div style={styles.page}>
@@ -132,6 +162,11 @@ function AccessDenied({ user, allowedRoles, onLogout }) {
   );
 }
 
+/**
+ * Guards a route by requiring authentication and one of the supplied roles.
+ * @param {{allowedRoles: string[], title: string, children: import("react").ReactNode}} props - Gate props.
+ * @returns {import("react").ReactNode} The guarded content or an auth state screen.
+ */
 export default function AuthGate({ allowedRoles, title, children }) {
   const { user, loading, isAuthenticated, hasRole, logout } = useAuth();
 
