@@ -7,31 +7,37 @@
  * @returns {JSX.Element}
  */
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useTranslation } from "../contexts/TranslationContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const TABS = ["Menu", "Inventory", "Employees", "Reports"];
 
 export default function ManagerDashboard() {
-  const navigate = useNavigate();
   const { t, translateBatch, lang } = useTranslation();
+  const { user, logout } = useAuth();
   const [tab, setTab] = useState("Menu");
 
   useEffect(() => {
-    translateBatch(["Manager Dashboard", "Menu", "Inventory", "Employees", "Reports", "← Back"]);
+    translateBatch(["Manager Dashboard", "Menu", "Inventory", "Employees", "Reports", "Sign Out"]);
   }, [lang, translateBatch]);
 
   return (
     <div style={s.page}>
       <header style={s.header}>
-        <button onClick={() => navigate("/")} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 8, padding: "0.3rem 0.7rem", fontWeight: 600, fontSize: "0.85rem", color: "var(--text-light)" }}>{t("← Back")}</button>
         <h1 style={{ fontSize: "1.2rem", fontWeight: 700 }}>{t("Manager Dashboard")}</h1>
         <nav style={{ display: "flex", gap: "0.25rem", marginLeft: "auto" }}>
           {TABS.map((tb) => (
             <button key={tb} onClick={() => setTab(tb)} style={{ ...s.tabBtn, ...(tb === tab ? s.tabActive : {}) }}>{t(tb)}</button>
           ))}
         </nav>
+        <div style={s.accountBox}>
+          <div>
+            <div style={s.accountName}>{user?.name || user?.email}</div>
+            <div style={s.accountMeta}>{user?.email}</div>
+          </div>
+          <button className="btn-outline" onClick={logout}>{t("Sign Out")}</button>
+        </div>
       </header>
       <main style={s.main}>
         {tab === "Menu" && <MenuTab />}
@@ -460,5 +466,8 @@ const s = {
   tabBtn: { padding: "0.4rem 1rem", borderRadius: 8, background: "transparent", border: "none", fontWeight: 500, color: "var(--text-light)" },
   tabActive: { background: "var(--primary)", color: "#fff" },
   main: { flex: 1, padding: "1.5rem", maxWidth: 1200, width: "100%", margin: "0 auto" },
+  accountBox: { display: "flex", alignItems: "center", gap: "0.75rem", marginLeft: "1rem" },
+  accountName: { fontWeight: 700, fontSize: "0.9rem" },
+  accountMeta: { fontSize: "0.75rem", color: "var(--text-light)" },
   field: { display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-light)" },
 };

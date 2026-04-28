@@ -8,6 +8,7 @@
  */
 import { Router } from "express";
 import pool from "../db.js";
+import { requireAuth } from "../auth.js";
 
 const router = Router();
 
@@ -65,7 +66,7 @@ router.get("/:id", async (req, res) => {
  * @param {express.Request} req - HTTP request with { name, category, base_price, ingredients? }.
  * @param {express.Response} res - HTTP response with created item.
  */
-router.post("/", async (req, res) => {
+router.post("/", requireAuth(["manager"]), async (req, res) => {
   const { name, category, base_price, ingredients } = req.body;
   const client = await pool.connect();
   try {
@@ -100,7 +101,7 @@ router.post("/", async (req, res) => {
  * @param {express.Request} req - HTTP request with { name, category, base_price, ingredients? }.
  * @param {express.Response} res - HTTP response with updated item.
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAuth(["manager"]), async (req, res) => {
   const { name, category, base_price, ingredients } = req.body;
   const client = await pool.connect();
   try {
@@ -136,7 +137,7 @@ router.put("/:id", async (req, res) => {
  * @param {express.Request} req - HTTP request with menu_item_id in URL.
  * @param {express.Response} res - HTTP response with { deleted: true }.
  */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAuth(["manager"]), async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");

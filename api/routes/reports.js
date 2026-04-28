@@ -8,8 +8,10 @@
  */
 import { Router } from "express";
 import pool from "../db.js";
+import { requireAuth } from "../auth.js";
 
 const router = Router();
+router.use(requireAuth(["manager"]));
 
 /**
  * GET /x-report - Retrieve hourly sales summary for today (no destructive side effects).

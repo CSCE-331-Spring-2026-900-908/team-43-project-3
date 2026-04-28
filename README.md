@@ -1,4 +1,4 @@
-# ShareTea POS – Team 43
+# Iroh's Tea POS – Team 43
 
 Web-based Point of Sale system for Project 3.
 
@@ -16,25 +16,27 @@ npm run build
 npm start
 ```
 
-## Deploy To Vercel
+## Google OAuth Setup
+
+Add these environment variables before using the protected `/cashier` and `/manager` views:
 
 ```bash
-vercel
+GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_IDS=your-google-oauth-client-id.apps.googleusercontent.com
+APP_AUTH_SECRET=replace-with-a-long-random-secret
+GOOGLE_MANAGER_EMAILS=manager1@example.com,manager2@example.com
+GOOGLE_CASHIER_EMAILS=cashier1@example.com,cashier2@example.com
+# Optional: grants cashier access to any verified Google account on this domain
+GOOGLE_ALLOWED_DOMAIN=example.com
 ```
 
-Set these project environment variables in Vercel before deploying:
+Notes:
 
-- `DB_HOST`
-- `DB_PORT`
-- `DB_NAME`
-- `DB_USER`
-- `DB_PASSWORD`
-- `WEATHER_LAT`
-- `WEATHER_LON`
-- `TRANSLATE_API_URL`
-- `OPENAI_API_KEY`
-
-Vercel builds the frontend from `client/` and serves the backend through `api/index.js`.
+- `GOOGLE_CLIENT_ID` should match the Web client you configure in Google Cloud.
+- `GOOGLE_CLIENT_IDS` can contain a comma-separated list if you use separate client IDs across environments.
+- `/manager` requires a manager email.
+- `/cashier` accepts cashier or manager emails.
+- Set the same variables in Vercel project settings for production deployments.
 
 ## Structure
 

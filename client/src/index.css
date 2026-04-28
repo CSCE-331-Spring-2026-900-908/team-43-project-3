@@ -7,7 +7,7 @@
   --bg: #faf7f2;
   --card: #ffffff;
   --text: #2d2013;
-  --text-light: #8a7968;
+  --text-light: #655443;
   --border: #e8e0d6;
   --success: #4caf50;
   --danger: #e53935;
@@ -97,6 +97,12 @@ th { font-weight: 600; color: var(--text-light); font-size: 0.85rem; text-transf
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+/* ========= PRIZE WHEEL SPIN ANIMATION ========= */
+@keyframes spin-prize {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 /* ========= HIGH CONTRAST MODE ========= */
 body.high-contrast {

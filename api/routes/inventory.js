@@ -8,6 +8,7 @@
  */
 import { Router } from "express";
 import pool from "../db.js";
+import { requireAuth } from "../auth.js";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ const router = Router();
  * @param {express.Request} _req - HTTP request (unused).
  * @param {express.Response} res - HTTP response with array of inventory items.
  */
-router.get("/", async (_req, res) => {
+router.get("/", requireAuth(["manager"]), async (_req, res) => {
   try {
     const { rows } = await pool.query(
       "SELECT * FROM inventory_items ORDER BY name"
@@ -32,7 +33,7 @@ router.get("/", async (_req, res) => {
  * @param {express.Request} req - HTTP request with { name?, unit?, stock_quantity? }.
  * @param {express.Response} res - HTTP response with updated item.
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAuth(["manager"]), async (req, res) => {
   const { name, unit, stock_quantity } = req.body;
   try {
     const { rows } = await pool.query(
@@ -55,7 +56,7 @@ router.put("/:id", async (req, res) => {
  * @param {express.Request} req - HTTP request with { name, unit, stock_quantity? }.
  * @param {express.Response} res - HTTP response with created item (default stock: 10000).
  */
-router.post("/", async (req, res) => {
+router.post("/", requireAuth(["manager"]), async (req, res) => {
   const { name, unit, stock_quantity } = req.body;
   try {
     const { rows } = await pool.query(
