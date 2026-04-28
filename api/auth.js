@@ -1,5 +1,13 @@
+/**
+ * Authentication helpers for Google OAuth verification, app token signing, and route authorization.
+ */
 import crypto from "crypto";
 
+/**
+ * Encodes a string as base64url text for JWT segments.
+ * @param {string} value - The plain text value to encode.
+ * @returns {string} The base64url-encoded value.
+ */
 function base64UrlEncode(value) {
   return Buffer.from(value)
     .toString("base64")
@@ -8,16 +16,29 @@ function base64UrlEncode(value) {
     .replace(/=+$/g, "");
 }
 
+/**
+ * Decodes a base64url string back into UTF-8 text.
+ * @param {string} value - The base64url value to decode.
+ * @returns {string} The decoded UTF-8 text.
+ */
 function base64UrlDecode(value) {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const padding = (4 - (normalized.length % 4)) % 4;
   return Buffer.from(`${normalized}${"=".repeat(padding)}`, "base64").toString("utf8");
 }
 
+/**
+ * Resolves the shared server secret used to sign app JWTs.
+ * @returns {string} The configured app secret or local development fallback.
+ */
 function getAppSecret() {
   return process.env.APP_AUTH_SECRET || process.env.GOOGLE_CLIENT_IDS || "dev-auth-secret";
 }
 
+/**
+ * Reads the list of accepted Google OAuth client IDs from the environment.
+ * @returns {string[]} The configured Google client IDs.
+ */
 function getAllowedClientIds() {
   return (process.env.GOOGLE_CLIENT_IDS || process.env.GOOGLE_CLIENT_ID || "")
     .split(",")
@@ -25,6 +46,11 @@ function getAllowedClientIds() {
     .filter(Boolean);
 }
 
+/**
+ * Reads a comma-separated environment variable into a normalized email set.
+ * @param {string} varName - The environment variable name to read.
+ * @returns {Set<string>} Lowercase email addresses allowed by that variable.
+ */
 function getAllowedEmails(varName) {
   return new Set(
     (process.env[varName] || "")
@@ -34,6 +60,11 @@ function getAllowedEmails(varName) {
   );
 }
 
+/**
+ * Determines which POS role a verified Google email should receive.
+ * @param {string} email - The user's verified Google email address.
+ * @returns {"manager"|"cashier"|null} The resolved role, or null when unauthorized.
+ */
 export function resolveUserRole(email) {
   const normalizedEmail = email.trim().toLowerCase();
   const managerEmails = getAllowedEmails("GOOGLE_MANAGER_EMAILS");
@@ -46,6 +77,12 @@ export function resolveUserRole(email) {
   return null;
 }
 
+/**
+ * Verifies a Google ID token against Google's tokeninfo endpoint.
+ * @param {string} idToken - The credential returned by Google Identity Services.
+ * @returns {Promise<{googleId: string, email: string, name: string, picture: string}>} The verified Google user profile.
+ * @throws {Error} When OAuth is not configured or the token is invalid.
+ */
 export async function verifyGoogleIdToken(idToken) {
   const clientIds = getAllowedClientIds();
   if (clientIds.length === 0) {
@@ -75,6 +112,11 @@ export async function verifyGoogleIdToken(idToken) {
   };
 }
 
+/**
+ * Creates a signed short-lived application token for an authenticated POS user.
+ * @param {{googleId: string, email: string, name: string, picture: string, role: string}} user - The authenticated user payload.
+ * @returns {string} A signed JWT-like application token.
+ */
 export function createAppToken(user) {
   const header = { alg: "HS256", typ: "JWT" };
   const payload = {
@@ -95,6 +137,12 @@ export function createAppToken(user) {
   return `${encodedHeader}.${encodedPayload}.${signature}`;
 }
 
+/**
+ * Validates an application token and returns its decoded payload.
+ * @param {string} token - The signed application token to validate.
+ * @returns {object} The decoded token payload.
+ * @throws {Error} When the token is missing, malformed, expired, or has a bad signature.
+ */
 export function verifyAppToken(token) {
   if (!token) {
     throw new Error("Missing token");
@@ -125,12 +173,22 @@ export function verifyAppToken(token) {
   return payload;
 }
 
+/**
+ * Pulls a bearer token from an Express request's Authorization header.
+ * @param {import("express").Request} req - The incoming Express request.
+ * @returns {string|null} The token without the Bearer prefix, or null when missing.
+ */
 function extractBearerToken(req) {
   const header = req.headers.authorization || "";
   if (!header.startsWith("Bearer ")) return null;
   return header.slice("Bearer ".length);
 }
 
+/**
+ * Builds Express middleware that requires a valid app token and optional role match.
+ * @param {string[]} [allowedRoles=[]] - Role names allowed to access the route.
+ * @returns {import("express").RequestHandler} Middleware that attaches the decoded user to the request.
+ */
 export function requireAuth(allowedRoles = []) {
   return (req, res, next) => {
     try {
@@ -149,6 +207,10 @@ export function requireAuth(allowedRoles = []) {
   };
 }
 
+/**
+ * Returns public authentication settings needed by the client.
+ * @returns {{googleClientId: string, allowedDomain: string}} Client-safe Google OAuth configuration.
+ */
 export function getAuthConfig() {
   return {
     googleClientId: getAllowedClientIds()[0] || "",

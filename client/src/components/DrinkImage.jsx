@@ -1,3 +1,6 @@
+/**
+ * Drink image resolver and display component for menu item cards.
+ */
 const DRINK_IMAGES = [
   { src: "/honey_milk_tea.webp", terms: ["honey milk tea"] },
   { src: "/jasmine_milk_tea.webp", terms: ["jasmine milk tea"] },
@@ -26,10 +29,21 @@ const CATEGORY_IMAGES = {
   Seasonal: "/mango_blend.webp",
 };
 
+/**
+ * Normalizes drink names and search terms for loose image matching.
+ * @param {string} value - The text to normalize.
+ * @returns {string} Lowercase alphanumeric text separated by single spaces.
+ */
 function normalize(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+/**
+ * Finds the most specific image available for a drink name and category.
+ * @param {string} name - The menu item name.
+ * @param {string} category - The menu item category.
+ * @returns {string} The resolved image path.
+ */
 function resolveDrinkImage(name, category) {
   const normalizedName = normalize(name);
   const exact = DRINK_IMAGES.find((image) =>
@@ -45,6 +59,11 @@ function resolveDrinkImage(name, category) {
   return CATEGORY_IMAGES[category] || CATEGORY_IMAGES["Milk Tea"];
 }
 
+/**
+ * Renders a drink image with a category fallback when the specific asset fails.
+ * @param {{name?: string, category?: string, style?: object}} props - Drink image props.
+ * @returns {import("react").ReactElement} The menu item image.
+ */
 export default function DrinkImage({ name = "Drink", category = "Milk Tea", style }) {
   const src = resolveDrinkImage(name, category);
 

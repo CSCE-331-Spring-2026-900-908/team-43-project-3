@@ -1,3 +1,6 @@
+/**
+ * Authentication API routes for Google login, auth config, and current-user lookup.
+ */
 import { Router } from "express";
 import {
   createAppToken,
@@ -7,16 +10,38 @@ import {
   verifyGoogleIdToken,
 } from "../auth.js";
 
+/**
+ * Express router that exposes Google OAuth login and session-check endpoints.
+ * @type {import("express").Router}
+ */
 const router = Router();
 
+/**
+ * Sends public authentication configuration to the frontend.
+ * @param {import("express").Request} _req - The unused Express request.
+ * @param {import("express").Response} res - The Express response.
+ * @returns {void}
+ */
 router.get("/config", (_req, res) => {
   res.json(getAuthConfig());
 });
 
+/**
+ * Returns the current authenticated app user from the verified token.
+ * @param {import("express").Request} req - The authenticated Express request.
+ * @param {import("express").Response} res - The Express response.
+ * @returns {void}
+ */
 router.get("/me", requireAuth(["cashier", "manager"]), (req, res) => {
   res.json({ user: req.user });
 });
 
+/**
+ * Exchanges a Google credential for an app token when the account is authorized.
+ * @param {import("express").Request} req - The Express request containing a Google credential.
+ * @param {import("express").Response} res - The Express response.
+ * @returns {Promise<void>}
+ */
 router.post("/google", async (req, res) => {
   const { credential } = req.body || {};
 
